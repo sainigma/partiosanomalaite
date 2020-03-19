@@ -107,22 +107,40 @@
     "materials" : [
         {
             "emissiveFactor" : [
-                1,
+                0.7991032004356384,
                 0,
-                0.0027703794185072184
+                0.0006070714443922043
             ],
             "name" : "segmentLight",
-            "pbrMetallicRoughness" : {}
+            "pbrMetallicRoughness" : {
+                "baseColorFactor" : [
+                    0.7991032004356384,
+                    0,
+                    0.0006070714443922043,
+                    1
+                ],
+                "metallicFactor" : 1,
+                "roughnessFactor" : 1
+            }
         },
         {
             "doubleSided" : true,
             "emissiveFactor" : [
-                0.11068704724311829,
                 0,
-                0.0003474924887996167
+                0,
+                0
             ],
             "name" : "tausta",
-            "pbrMetallicRoughness" : {}
+            "pbrMetallicRoughness" : {
+                "baseColorFactor" : [
+                    0.11068525910377502,
+                    0.0009569035610184073,
+                    0,
+                    1
+                ],
+                "metallicFactor" : 1,
+                "roughnessFactor" : 1
+            }
         }
     ],
     "meshes" : [

@@ -86,7 +86,8 @@ const alphaNumeric = {
   '0':['BL','BR','CLL','CUR','LL','LR','TL','TR','UL','UR'],
   '-':['CML','CMR'],
   '.':['BL'],
-  ',':['BL']
+  ',':['BL'],
+  '?':['TL','TR','UR','CMR','CLM']
 }
 
 const special = {
