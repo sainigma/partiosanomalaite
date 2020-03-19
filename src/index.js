@@ -1,25 +1,8 @@
 import * as THREE from 'three'
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
+import { SegmentDisplay } from './components/SegmentDisplay'
 
 let camera,scene,renderer
-let display = {
-  segments:[]
-}
-
-const createDisplay = () => {
-  const loader = new GLTFLoader().setPath('models/')
-  loader.load('segmentDisplay.gltf', (gltf) => {
-    let segmentDisplay = gltf.scene
-    for(let i=0; i<16; i++){
-      let displayClone = segmentDisplay.clone()
-      displayClone.position.set(i*0.05,0,0)
-      displayClone.children[i+1].visible = false
-      scene.add(displayClone)
-      display.segments.push(displayClone)
-    }
-  })
-}
-
+let segmentDisplay
 
 const init = () => {
   let container
@@ -31,14 +14,13 @@ const init = () => {
   camera.lookAt( new THREE.Vector3(0.4,0,0) )
 
   scene = new THREE.Scene()
-  renderer = new THREE.WebGLRenderer( {alpha: true} )
+  renderer = new THREE.WebGLRenderer( {alpha: false} )
   renderer.setPixelRatio(window.devicePixelRatio)
   renderer.setSize(window.innerWidth, window.innerHeight)
   container.appendChild(renderer.domElement)
 
-  createDisplay()
-  //scene.add( display.displays[0] )
-
+  segmentDisplay = new SegmentDisplay(16,scene)
+  
   scene.add(camera)
 }
 
@@ -46,15 +28,14 @@ const animate = () => {
   requestAnimationFrame(animate)
   update()
 }
-let once = true
+let asd = Date.now()/1E3
 const update = () => {
   const epochSeconds = Date.now()/1E3
-
-
-  if( display.segments.length > 0 && once ){
-    console.log(display)
-    once = false
+  if( epochSeconds - asd > 0.1 ){
+    asd = epochSeconds
+    segmentDisplay.update(1)
   }
+
   renderer.render(scene,camera)
 }
 
