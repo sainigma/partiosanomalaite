@@ -18,7 +18,7 @@ const segmentEnum = {
   "dot":17
 }
 
-const alphaNumeric = {
+const characters = {
   'A':['CML','CMR','LL','LR','TL','TR','UL','UR'],
   'B':['BL','BR','CLM','CMR','CUM','LR','TL','TR','UR'],
   'C':['BL','BR','LL','TL','TR','UL'],
@@ -89,11 +89,14 @@ const alphaNumeric = {
   '.':['dot'],
   ',':['dot'],
   '?':['TL','TR','UR','CMR','CLM'],
-  '¤':['CMR','TL','TR','UR','LR','BR','BL','LL','UL','CUL','CUM','CUR','CLL','CLR','CLM','CML','dot']
-}
-
-const special = {
+  '¤':['CMR','TL','TR','UR','LR','BR','BL','LL','UL','CUL','CUM','CUR','CLL','CLR','CLM','CML','dot'],
+  '[':['UL','LL','TL','BL'],
+  '(':['UL','LL','TL','BL'],
+  ']':['UR','LR','TR','BR'],
+  ')':['UR','LR','TR','BR'],
   '☰':['BL','BR','CML','CMR','TL','TR'],
+  '@':['BL','BR','TL','TR','UL','LL','UR','CMR','CUM'],
+  '_':['BL','BR']
 }
 
 const loading = {
@@ -111,10 +114,10 @@ export const getCharacterArray = (type, character) => {
   switch(type){
     case 'basic':
       let char = character
-      if(!(character in alphaNumeric) ){
+      if(!(character in characters) ){
         char = '¤'
       }
-      let result = alphaNumeric[char].map( item => {
+      let result = characters[char].map( item => {
         return segmentEnum[item]
       })
       return result
