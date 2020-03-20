@@ -14,7 +14,8 @@ const segmentEnum = {
   "CLL":12,
   "CLR":13,
   "CLM":14,
-  "CML":15
+  "CML":15,
+  "dot":17
 }
 
 const alphaNumeric = {
@@ -85,9 +86,10 @@ const alphaNumeric = {
   '9':['CML','CMR','LR','TL','TR','UL','UR'],
   '0':['BL','BR','CLL','CUR','LL','LR','TL','TR','UL','UR'],
   '-':['CML','CMR'],
-  '.':['BL'],
-  ',':['BL'],
-  '?':['TL','TR','UR','CMR','CLM']
+  '.':['dot'],
+  ',':['dot'],
+  '?':['TL','TR','UR','CMR','CLM'],
+  '¤':['CMR','TL','TR','UR','LR','BR','BL','LL','UL','CUL','CUM','CUR','CLL','CLR','CLM','CML','dot']
 }
 
 const special = {
@@ -108,7 +110,11 @@ const loading = {
 export const getCharacterArray = (type, character) => {
   switch(type){
     case 'basic':
-      let result = alphaNumeric[character].map( item => {
+      let char = character
+      if(!(character in alphaNumeric) ){
+        char = '¤'
+      }
+      let result = alphaNumeric[char].map( item => {
         return segmentEnum[item]
       })
       return result
