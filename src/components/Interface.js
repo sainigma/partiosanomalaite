@@ -10,13 +10,14 @@ export class Interface {
       hasUpdated:false
     }
     this.settings = {
+      index:0,
       time:0,
-      callsign:'LBA',
-      subgroup:'LAA',
-      group:'AAA',
-      ack:true,
-      speed:600,
-      power:0
+      callsign:'',
+      subgroup:'',
+      group:'',
+      ack:false,
+      speed:2,
+      boost:false
     }
     this.bouncer = {
       debounced: true,
@@ -64,7 +65,7 @@ export class Interface {
 
       const waitDuration = epoch - this.bouncer.waitStart
       switch(true){
-        case waitDuration > 10:
+        case waitDuration > 0.5:
           this.state.view = 'time'
           this.bouncer.waitStart = 0
           break
@@ -91,68 +92,40 @@ export class Interface {
           if( keyCodes.length === 2 && ( keyCodes[0] === 16 || keyCodes[0] === 60 )){
             this.bouncer.debounced = false
             let digit
-            switch( keyCodes[1] ){
-              case 81:
-                digit = 1
-                break
-              case 87:
-                digit = 2
-                break
-              case 69:
-                digit = 3
-                break
-              case 82:
-                digit = 4
-                break
-              case 84:
-                digit = 5
-                break
-              case 89:
-                digit = 6
-                break
-              case 85:
-                digit = 7
-                break
-              case 73:
-                digit = 8
-                break
-              case 79:
-                digit = 9
-                break
-              case 80:
-                digit = 0
-                break
-            }
-            if( isNaN( parseInt(this.state.input) ) ){
-              if( digit < 3 ){
-                const newInput = digit+'___'
-                this.state.input = newInput
-                this.display.setMessage(baseMessage+newInput)
-              }
-            }else{
-              let currentInput = this.state.input
-              currentInput = currentInput.replace(/_/g,'')
-              switch( currentInput.length ){
-                case 1:
-                  if( parseInt(currentInput)*10 + digit < 24 ){
-                    let newInput = currentInput + digit + '__'
-                    this.state.input = newInput
-                    this.display.setMessage(baseMessage+newInput)
-                  }
-                  break
-                case 2:
-                  if( digit < 6 ){
-                    let newInput = currentInput + digit + '_'
-                    this.state.input = newInput
-                    this.display.setMessage(baseMessage+newInput)
-                  }
-                  break
-                case 3:
-                  let newInput = currentInput + digit
+            const shiftEnum = [ 80, 81, 87, 69, 82, 84, 89, 85, 73, 79 ]
+            digit = shiftEnum.indexOf( keyCodes[1] )
+            if( digit !== -1 ){
+              if( isNaN( parseInt(this.state.input) ) ){
+                if( digit < 3 ){
+                  const newInput = digit+'___'
                   this.state.input = newInput
-                  this.display.setMessage('AIKA ok?    '+newInput)
-                default:
-                  console.log( currentInput )
+                  this.display.setMessage(baseMessage+newInput)
+                }
+              }else{
+                let currentInput = this.state.input
+                currentInput = currentInput.replace(/_/g,'')
+                switch( currentInput.length ){
+                  case 1:
+                    if( parseInt(currentInput)*10 + digit < 24 ){
+                      let newInput = currentInput + digit + '__'
+                      this.state.input = newInput
+                      this.display.setMessage(baseMessage+newInput)
+                    }
+                    break
+                  case 2:
+                    if( digit < 6 ){
+                      let newInput = currentInput + digit + '_'
+                      this.state.input = newInput
+                      this.display.setMessage(baseMessage+newInput)
+                    }
+                    break
+                  case 3:
+                    let newInput = currentInput + digit
+                    this.state.input = newInput
+                    this.display.setMessage('AIKA ok?    '+newInput)
+                  default:
+                    console.log( currentInput )
+                }
               }
             }
           }else if( keyCodes[0] === 35 || keyCodes[0] === 222){
@@ -213,15 +186,59 @@ export class Interface {
     }
   }
   configuration(keyCodes){
+    const setCallsign = () => {
+
+    }
+
+    const setGroups = () => {
+
+    }
+
+    const toggleAck = () => {
+      this.settings.ack = !this.settings.ack
+    }
+
+    const incrementSpeed = () => {
+      let speed = this.settings.speed + 1
+      if( speed > 2 ) speed = 0
+      this.settings.speed = speed
+    }
+
+    const toggleBoost = () => {
+      this.settings.boost = !this.settings.boost
+    }
+
+    const executeConfigAction = (i) => {
+      this.settings.index = i
+      this.bouncer.debounced = false
+      console.log("moi!")
+      switch(i){
+        case 0:
+          break
+        case 1:
+          break
+        case 2:
+          toggleAck()
+          break
+        case 3:
+          incrementSpeed()
+          break
+        case 4:
+          toggleBoost()
+          break
+      }
+      this.state.hasUpdated = false
+    }
+
     const submenus = [
       `Tunnus       ${ this.settings.callsign ? this.settings.callsign : '  ?' }`,
-      `Ryhmät   ${ this.settings.subgroup ? this.settings.subgroup : '  ?' },${ this.settings.group ? this.settings.group : ' ?' }`,
+      `Ryhmät    ${ this.settings.subgroup ? this.settings.subgroup : '  ?' }${ this.settings.group ? this.settings.group : '  ?' }`,
       `Kuitt   ${ this.settings.ack ? '   autom' : 'ei autom' }`,
-      'Lähtnop    600bd',
-      'Pieni taso',
+      `Lähtnop   ${ this.settings.speed === 0 ? ' 600bd' : this.settings.speed === 1 ? '1200bd' : '2400bd' }`,
+      `${this.settings.boost ? 'Suuri taso' : 'Pieni taso'}`,
     ]
     if( !this.state.hasUpdated ){
-      this.display.setMessage(submenus[0])
+      this.display.setMessage(submenus[this.settings.index])
       this.state.hasUpdated = true
     }else{
       if( this.bouncer.debounced ){
@@ -244,8 +261,13 @@ export class Interface {
             break
           case 35:
           case 222:
+            this.settings.index = 0
             this.state.view = 'mainmenu'
             this.state.hasUpdated = false
+            break
+          case 13:
+          case 192:
+            executeConfigAction(index)
             break
         }
       }
