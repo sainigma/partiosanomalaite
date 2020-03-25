@@ -1,7 +1,7 @@
 export class Interface {
-  constructor(display){
+  constructor(display, parsaGroup){
     this.version = 'V 20200320A'
-
+    this.parsaGroup = parsaGroup
     let date = new Date()
 
     this.state = {
@@ -15,7 +15,7 @@ export class Interface {
       callsign:'',
       subgroup:'',
       group:'',
-      ack:false,
+      ack:true,
       speed:2,
       boost:false
     }
@@ -54,6 +54,8 @@ export class Interface {
     }
 
     if( this.bouncer.waitStart === 0 ){
+      const ogRot = this.parsaGroup.rotation
+      this.parsaGroup.rotation.set(120,ogRot.y,ogRot.z)
       this.bouncer.waitStart = epoch
       this.display.setMessage( '................' )
     }else{
@@ -65,7 +67,7 @@ export class Interface {
 
       const waitDuration = epoch - this.bouncer.waitStart
       switch(true){
-        case waitDuration > 0.5:
+        case waitDuration > 8:
           this.state.view = 'time'
           this.bouncer.waitStart = 0
           break
@@ -84,8 +86,15 @@ export class Interface {
   setTime(keyCodes){
     const baseMessage = 'AIKA ?      '
     if( !this.state.hasUpdated ){
-      this.state.input = '____'
-      this.display.setMessage(baseMessage+'____')
+      if( this.settings.time === 0 ){
+        this.state.input = '____'
+      }else{
+        const pad = (input) => { return input < 10 ? `0${input}` : input }
+        const initialTime = new Date( Date.now() + this.settings.time )
+        this.state.input = `${pad( initialTime.getHours() )}${pad( initialTime.getMinutes() )}`
+      }
+      
+      this.display.setMessage(baseMessage+this.state.input)
       this.state.hasUpdated = true
     }else{
         if( this.bouncer.debounced ){
@@ -123,8 +132,7 @@ export class Interface {
                     let newInput = currentInput + digit
                     this.state.input = newInput
                     this.display.setMessage('AIKA ok?    '+newInput)
-                  default:
-                    console.log( currentInput )
+                    break
                 }
               }
             }
@@ -157,7 +165,11 @@ export class Interface {
             let currentInput = this.state.input
             currentInput = currentInput.replace(/_/g,'')
             if( currentInput.length === 4 ){
-              //tallenna aika
+              const hours = currentInput.slice(0,2)
+              const minutes = currentInput.slice(2,4)
+              let tempDate = new Date()
+              tempDate.setHours(hours,minutes,0)
+              this.settings.time = tempDate.getTime() - Date.now()
               this.state.view = 'mainmenu'
               this.state.hasUpdated = false
             }
@@ -181,6 +193,9 @@ export class Interface {
             this.state.hasUpdated = false
             this.state.view = 'config'
             break
+          case 80:
+            this.state.hasUpdated = false
+            this.state.view = 'time'
         }
       }
     }

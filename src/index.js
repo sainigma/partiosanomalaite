@@ -4,13 +4,14 @@ import { Parsa } from './objects/Parsa'
 import { Keyboard } from './objects/Keyboard'
 import { EnviroSphere } from './objects/EnviroSphere'
 import { KeyListener } from './components/KeyListener'
+import { MouseListener } from './components/MouseListener'
 import { Interface } from './components/Interface'
 import './styles.css'
 
 let camera,scene,renderer
-let sceneObjects,allObjects
+let parsaGroup,cameraPivot
 let segmentDisplay,parsa,enviroSphere,keyboard
-let keyListener, parsaInterface
+let keyListener, mouseListener, parsaInterface
 
 const init = () => {
   let container
@@ -18,8 +19,8 @@ const init = () => {
 
   camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.05, 50)
   camera.position.y = 1.8
-  camera.position.x = -1
-  camera.position.z = 1
+  camera.position.x = 0
+  camera.position.z = 2
   camera.lookAt( new THREE.Vector3(0,0,0) )
 
   scene = new THREE.Scene()
@@ -33,20 +34,20 @@ const init = () => {
   container.appendChild(renderer.domElement)
 
   enviroSphere = new EnviroSphere(scene,renderer)
-  sceneObjects = new THREE.Group()
-  allObjects = new THREE.Group()
-  parsa = new Parsa(sceneObjects)
+  parsaGroup = new THREE.Group()
+  cameraPivot = new THREE.Group()
+  parsa = new Parsa(parsaGroup)
   const segmentInitialPosition = new THREE.Vector3(-0.38,0.42,-0.3)
-  segmentDisplay = new SegmentDisplay(16,sceneObjects,segmentInitialPosition)
-  keyboard = new Keyboard(sceneObjects)
-  sceneObjects.rotateOnWorldAxis(new THREE.Vector3(1,0,0),3.141/6)
-  allObjects.add(sceneObjects)
-  allObjects.add(camera)
-
-  scene.add(allObjects)
-  allObjects.rotateOnWorldAxis(new THREE.Vector3(0,1,0),-3.141*0.7)
+  segmentDisplay = new SegmentDisplay(16,parsaGroup,segmentInitialPosition)
+  keyboard = new Keyboard(parsaGroup)
+  scene.add(parsaGroup)
+  cameraPivot.add(camera)
+  parsaGroup.rotation.set(0,0,0)
+  scene.add(cameraPivot)
+  scene.rotateOnWorldAxis(new THREE.Vector3(0,1,0),-3.141*0.7)
   keyListener = new KeyListener()
-  parsaInterface = new Interface(segmentDisplay)
+  mouseListener = new MouseListener()
+  parsaInterface = new Interface(segmentDisplay, parsaGroup)
 }
 
 const animate = () => {
@@ -57,8 +58,11 @@ let lastRefreshed = Date.now()/1E3
 const update = () => {
   const epoch = Date.now()/1E3
   const keysDown = keyListener.getKeysDown()
+  const mouse = mouseListener.getDeltas()
+  const zoom = 1-mouse.y/1080
   keyboard.moveKeys( keysDown )
-
+  cameraPivot.rotation.set(0,3*(mouse.x/1920),0)
+  cameraPivot.scale.set(zoom, zoom, zoom)
   parsaInterface.update( keysDown, epoch )
   if( epoch - lastRefreshed > 4.16E-2 ){
     lastRefreshed = epoch
