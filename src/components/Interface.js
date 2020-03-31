@@ -6,6 +6,7 @@ export class Interface {
 
     this.state = {
       view:'off',
+      subview:'',
       input:'',
       hasUpdated:false
     }
@@ -67,7 +68,7 @@ export class Interface {
 
       const waitDuration = epoch - this.bouncer.waitStart
       switch(true){
-        case waitDuration > 8:
+        case waitDuration > 0.1:
           this.state.view = 'time'
           this.bouncer.waitStart = 0
           break
@@ -200,9 +201,54 @@ export class Interface {
       }
     }
   }
+
+  callsignConfiguration(keyCodes){
+    //todo kumitus
+    if( !this.state.hasUpdated ){
+      if( this.settings.callsign === '' ){
+        this.settings.callsign = '___'
+      }
+      if( this.settings.callsign.split('_').length === 1 ){
+        this.display.setMessage(`ok?          ${ this.settings.callsign }`)
+      }else this.display.setMessage(`             ${ this.settings.callsign }`)
+      this.state.hasUpdated = true
+    }else if( keyCodes.length > 0 && keyCodes[0] > 64 && keyCodes[0] < 91){
+      if( this.bouncer.debounced ){
+        this.bouncer.debounced = false
+        const splitter = this.settings.callsign.split('_')
+        const index =  4 - splitter.length
+        switch(index){
+          case 0:
+            this.settings.callsign = String.fromCharCode(keyCodes[0]) + '__'
+            break
+          case 1:
+            this.settings.callsign = this.settings.callsign.slice(0,1) + String.fromCharCode(keyCodes[0]) + '_'
+            break
+          case 2:
+            this.settings.callsign = this.settings.callsign.slice(0,2) + String.fromCharCode(keyCodes[0])
+            break
+        }
+        this.state.hasUpdated = false
+      }
+    }else if( keyCodes.length > 0 && (keyCodes[0] === 13 || keyCodes[0] === 192) && this.bouncer.debounced ){
+      this.bouncer.debounced = false
+      if( this.settings.callsign.split('_').length === 1 ){
+        this.state.hasUpdated = false
+        this.state.subview = ''
+      }
+    }else if( keyCodes.length > 0 && ( keyCodes[0] === 35 || keyCodes[0] === 222) && this.bouncer.debounced ){
+      this.bouncer.debounced = false
+      this.state.hasUpdated = false
+      this.state.subview = ''
+      this.settings.callsign = ''
+    }
+  }
+
   configuration(keyCodes){
     const setCallsign = () => {
-
+      this.state.subview = 'callsign'
+      this.settings.callsign = '___'
+      this.state.hasUpdated = false
     }
 
     const setGroups = () => {
@@ -226,11 +272,12 @@ export class Interface {
     const executeConfigAction = (i) => {
       this.settings.index = i
       this.bouncer.debounced = false
-      console.log("moi!")
       switch(i){
         case 0:
+          setCallsign()
           break
         case 1:
+          setGroups()
           break
         case 2:
           toggleAck()
@@ -305,7 +352,17 @@ export class Interface {
           this.setTime(keyCodes)
           break
         case 'config':
-          this.configuration(keyCodes)
+          if( this.state.subview === '' ){
+            this.configuration(keyCodes)
+          }else{
+            switch( this.state.subview ){
+              case 'callsign':
+                this.callsignConfiguration(keyCodes)
+                break
+              case 'group':
+                break
+            }
+          }
           break
       }
     }else{
