@@ -5,7 +5,7 @@ import { Keyboard } from './objects/Keyboard'
 import { EnviroSphere } from './objects/EnviroSphere'
 import { KeyListener } from './components/KeyListener'
 import { MouseListener } from './components/MouseListener'
-import { Interface } from './components/Interface'
+import { ParsaInterface } from './components/ParsaInterface'
 import './styles.css'
 
 let camera,scene,renderer
@@ -47,7 +47,7 @@ const init = () => {
   scene.rotateOnWorldAxis(new THREE.Vector3(0,1,0),-3.141*0.7)
   keyListener = new KeyListener()
   mouseListener = new MouseListener()
-  parsaInterface = new Interface(segmentDisplay, parsaGroup)
+  parsaInterface = new ParsaInterface(segmentDisplay, parsaGroup)
 }
 
 const animate = () => {

@@ -1,0 +1,166 @@
+import { timeConfig } from "./timeConfig"
+
+export class generalConfig extends timeConfig{
+
+  constructor(){
+    super()
+    this.settings = {
+      index:0,
+      callsign:'',
+      subgroup:'',
+      group:'',
+      ack:true,
+      speed:2,
+      boost:false
+    }
+  }
+
+  callsignConfiguration(keyCodes){
+    //todo kumitus
+    if( !this.state.hasUpdated ){
+      if( this.settings.callsign === '' ){
+        this.settings.callsign = '___'
+      }
+      if( this.settings.callsign.split('_').length === 1 ){
+        this.display.setMessage(`ok?          ${ this.settings.callsign }`)
+      }else this.display.setMessage(`             ${ this.settings.callsign }`)
+      this.state.hasUpdated = true
+    }else if( keyCodes.length > 0 && keyCodes[0] > 64 && keyCodes[0] < 91){
+      if( this.bouncer.debounced ){
+        this.bouncer.debounced = false
+        const splitter = this.settings.callsign.split('_')
+        const index =  4 - splitter.length
+        switch(index){
+          case 0:
+            this.settings.callsign = String.fromCharCode(keyCodes[0]) + '__'
+            break
+          case 1:
+            this.settings.callsign = this.settings.callsign.slice(0,1) + String.fromCharCode(keyCodes[0]) + '_'
+            break
+          case 2:
+            this.settings.callsign = this.settings.callsign.slice(0,2) + String.fromCharCode(keyCodes[0])
+            break
+        }
+        this.state.hasUpdated = false
+      }
+    }else if( keyCodes.length > 0 && (keyCodes[0] === 13 || keyCodes[0] === 192) && this.bouncer.debounced ){
+      this.bouncer.debounced = false
+      if( this.settings.callsign.split('_').length === 1 ){
+        this.state.hasUpdated = false
+        this.state.subview = ''
+        console.log("exit")
+      }
+    }else if( keyCodes.length > 0 && ( keyCodes[0] === 35 || keyCodes[0] === 222) && this.bouncer.debounced ){
+      this.bouncer.debounced = false
+      this.state.hasUpdated = false
+      this.state.subview = ''
+      console.log("exit")
+      this.settings.callsign = ''
+    }
+  }
+
+  configuration(keyCodes){
+    if( this.state.subview !== '' ){
+      switch( this.state.subview ){
+        case 'callsign':
+          this.callsignConfiguration(keyCodes)
+          break
+        case 'group':
+          break
+      }
+    }else this.configurationMenu(keyCodes)
+  }
+
+  configurationMenu(keyCodes){
+    const setCallsign = () => {
+      this.state.subview = 'callsign'
+      this.settings.callsign = ''
+      this.state.hasUpdated = false
+    }
+
+    const setGroups = () => {
+
+    }
+
+    const toggleAck = () => {
+      this.settings.ack = !this.settings.ack
+    }
+
+    const incrementSpeed = () => {
+      let speed = this.settings.speed + 1
+      if( speed > 2 ) speed = 0
+      this.settings.speed = speed
+    }
+
+    const toggleBoost = () => {
+      this.settings.boost = !this.settings.boost
+    }
+
+    const executeConfigAction = (i) => {
+      this.settings.index = i
+      this.bouncer.debounced = false
+      switch(i){
+        case 0:
+          setCallsign()
+          break
+        case 1:
+          setGroups()
+          break
+        case 2:
+          toggleAck()
+          break
+        case 3:
+          incrementSpeed()
+          break
+        case 4:
+          toggleBoost()
+          break
+      }
+      this.state.hasUpdated = false
+    }
+
+    const submenus = [
+      `Tunnus       ${ this.settings.callsign ? this.settings.callsign : '  ?' }`,
+      `Ryhmät    ${ this.settings.subgroup ? this.settings.subgroup : '  ?' }${ this.settings.group ? this.settings.group : '  ?' }`,
+      `Kuitt   ${ this.settings.ack ? '   autom' : 'ei autom' }`,
+      `Lähtnop   ${ this.settings.speed === 0 ? ' 600bd' : this.settings.speed === 1 ? '1200bd' : '2400bd' }`,
+      `${this.settings.boost ? 'Suuri taso' : 'Pieni taso'}`,
+    ]
+
+    if( !this.state.hasUpdated ){
+      this.display.setMessage(submenus[this.settings.index])
+      this.state.hasUpdated = true
+    }else{
+      if( this.bouncer.debounced ){
+        const currentMessage =this.display.getMessage()
+        let index = submenus.indexOf(currentMessage)
+        switch( keyCodes[0] ){
+          case 173:
+          case 39:
+            index++
+            if( index >= submenus.length ) index = 0
+            this.display.setMessage( submenus[index] )
+            this.bouncer.debounced = false
+            break
+          case 188:
+          case 37:
+            index--
+            if( index < 0 ) index = submenus.length -1
+            this.display.setMessage( submenus[index] )
+            this.bouncer.debounced = false
+            break
+          case 35:
+          case 222:
+            this.settings.index = 0
+            this.state.view = 'mainmenu'
+            this.state.hasUpdated = false
+            break
+          case 13:
+          case 192:
+            executeConfigAction(index)
+            break
+        }
+      }
+    }
+  }
+}
