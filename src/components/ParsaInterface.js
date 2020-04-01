@@ -1,6 +1,14 @@
 import { generalConfig } from "./ParsaInterface/generalConfig"
+import { keyConfig } from "./ParsaInterface/keyConfig"
+import { timeConfig } from "./ParsaInterface/timeConfig"
 
-export class ParsaInterface extends generalConfig{
+class classAggregator extends generalConfig(keyConfig(timeConfig(Object))){
+  constructor(){
+    super()
+  }
+}
+
+export class ParsaInterface extends classAggregator{
 
   constructor(display, parsaGroup){
     super()
@@ -12,7 +20,9 @@ export class ParsaInterface extends generalConfig{
       view:'off',
       subview:'',
       input:'',
-      hasUpdated:false
+      hasUpdated:false,
+      previousKey:0,
+      previousKeysLength:0
     }
 
     this.bouncer = {
@@ -87,7 +97,14 @@ export class ParsaInterface extends generalConfig{
       this.state.hasUpdated = true
     }else{
       if( keyCodes.length === 2 && ( keyCodes[0] === 16 || keyCodes[0] === 60 ) ){
-
+        switch( keyCodes[1] ){
+          case 69:
+            this.bouncer.debounced = false
+            this.state.hasUpdated = false
+            this.state.view = 'keys'
+            this.state.subview = 'new'
+            break
+        }
       }else if( keyCodes[0] >= 65 && keyCodes[0] <= 90 ){
         switch( keyCodes[0] ){
           case 82:
@@ -97,6 +114,12 @@ export class ParsaInterface extends generalConfig{
           case 80:
             this.state.hasUpdated = false
             this.state.view = 'time'
+            break
+          case 69:
+            this.state.hasUpdated = false
+            this.state.view = 'keys'
+            this.state.subview = ''
+            break
         }
       }
     }
@@ -104,6 +127,13 @@ export class ParsaInterface extends generalConfig{
   
   update(keyCodes, epoch){
     if( keyCodes.length > 0 || !this.state.hasUpdated ){
+      const keysLength = keyCodes.length
+      const lastKey = keyCodes[keysLength-1]
+      if( keysLength > this.state.previousKeysLength ){
+        this.bouncer.debounced = true
+        this.state.previousKey = lastKey
+      }
+      this.state.previousKeysLength = keysLength
       switch( this.state.view ){
         case 'off':
           this.offState(keyCodes,epoch)
@@ -120,9 +150,14 @@ export class ParsaInterface extends generalConfig{
         case 'config':
           this.configuration(keyCodes)
           break
+        case 'keys':
+          this.keyConfigurator(keyCodes)
+          break
       }
     }else{
       this.bouncer.debounced = true
+      this.state.previousKey = 0
+      this.state.previousKeysLength = 0
     }
   }
 }

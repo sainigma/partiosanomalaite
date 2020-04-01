@@ -1,5 +1,7 @@
-export class timeConfig {
+export const timeConfig = (mix) => class extends mix{
+
   constructor(){
+    super()
     this.time = 0
   }
   setTime(keyCodes){
@@ -17,11 +19,11 @@ export class timeConfig {
       this.state.hasUpdated = true
     }else{
         if( this.bouncer.debounced ){
-          if( keyCodes.length === 2 && ( keyCodes[0] === 16 || keyCodes[0] === 60 )){
+          if( keyCodes.length > 1 && ( keyCodes[0] === 16 || keyCodes[0] === 60 )){
             this.bouncer.debounced = false
             let digit
             const shiftEnum = [ 80, 81, 87, 69, 82, 84, 89, 85, 73, 79 ]
-            digit = shiftEnum.indexOf( keyCodes[1] )
+            digit = shiftEnum.indexOf( keyCodes[keyCodes.length-1] )
             if( digit !== -1 ){
               if( isNaN( parseInt(this.state.input) ) ){
                 if( digit < 3 ){

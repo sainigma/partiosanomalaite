@@ -96,7 +96,8 @@ const characters = {
   ')':['UR','LR','TR','BR'],
   '☰':['BL','BR','CML','CMR','TL','TR'],
   '@':['BL','BR','TL','TR','UL','LL','UR','CMR','CUM'],
-  '_':['BL','BR']
+  '_':['BL','BR'],
+  '=':['BL','BR','CML','CMR']
 }
 
 const loading = {

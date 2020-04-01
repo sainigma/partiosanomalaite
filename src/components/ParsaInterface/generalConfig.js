@@ -1,6 +1,4 @@
-import { timeConfig } from "./timeConfig"
-
-export class generalConfig extends timeConfig{
+export const generalConfig = (mix) => class extends mix{
 
   constructor(){
     super()
@@ -56,14 +54,14 @@ export class generalConfig extends timeConfig{
       this.state.hasUpdated = true
     }else if( keyCodes.length > 0 && this.bouncer.debounced ){
       this.bouncer.debounced = false
-
-      if( keyCodes[0] > 64 && keyCodes < 91 ){
+      const keyCode = keyCodes[keyCodes.length-1]
+      if( keyCode > 64 && keyCode < 91 ){
         this.state.hasUpdated = false
         if( this.settings.subgroup.split('_').length !== 1 ){
-          this.settings.subgroup = this.codeSetter(this.settings.subgroup, keyCodes[0])
-        }else this.settings.group = this.codeSetter(this.settings.group, keyCodes[0])
+          this.settings.subgroup = this.codeSetter(this.settings.subgroup, keyCode)
+        }else this.settings.group = this.codeSetter(this.settings.group, keyCode)
       }else{
-        switch( keyCodes[0] ){
+        switch( keyCode ){
           case 8:
           case 221:
             this.state.hasUpdated = false
@@ -100,12 +98,12 @@ export class generalConfig extends timeConfig{
 
     }else if( keyCodes.length > 0 && this.bouncer.debounced ){
       this.bouncer.debounced = false
-
-      if( keyCodes[0] > 64 && keyCodes < 91 ){
-        this.settings.callsign = this.codeSetter(this.settings.callsign, keyCodes[0])
+      const keyCode = keyCodes[keyCodes.length-1]
+      if( keyCode > 64 && keyCode < 91 ){
+        this.settings.callsign = this.codeSetter(this.settings.callsign, keyCode)
         this.state.hasUpdated = false
       }else{
-        switch( keyCodes[0] ){
+        switch( keyCode ){
           case 8:
           case 221:
             this.settings.callsign = this.codeEraser(this.settings.callsign)
@@ -208,7 +206,8 @@ export class generalConfig extends timeConfig{
       if( this.bouncer.debounced ){
         const currentMessage =this.display.getMessage()
         let index = submenus.indexOf(currentMessage)
-        switch( keyCodes[0] ){
+        const keyCode = keyCodes[keyCodes.length-1]
+        switch( keyCode ){
           case 173:
           case 39:
             index++

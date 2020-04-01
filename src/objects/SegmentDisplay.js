@@ -49,6 +49,12 @@ export class SegmentDisplay {
     this.scrolling = false
     this.timestamp = 0
   }
+  moveToLast(){
+    const messageLength = this.message.length
+    if( messageLength > 16 ){
+      this.message = this.message.slice(messageLength - 16, messageLength)
+    }
+  }
   setScrollingMessage(message, timestamp){
     this.message=message
     this.cursor=0
