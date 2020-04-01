@@ -1,4 +1,4 @@
-export const keyConfig = (mix) => class extends mix{
+export const KeyConfig = (mix) => class extends mix{
 
   constructor(){
     super()

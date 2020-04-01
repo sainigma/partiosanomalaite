@@ -1,4 +1,4 @@
-export const timeConfig = (mix) => class extends mix{
+export const TimeConfig = (mix) => class extends mix{
 
   constructor(){
     super()

@@ -1,14 +1,15 @@
-import { generalConfig } from "./ParsaInterface/generalConfig"
-import { keyConfig } from "./ParsaInterface/keyConfig"
-import { timeConfig } from "./ParsaInterface/timeConfig"
+import { GeneralConfig } from "./ParsaInterface/GeneralConfig"
+import { KeyConfig } from "./ParsaInterface/KeyConfig"
+import { TimeConfig } from "./ParsaInterface/TimeConfig"
+import { Messenger } from "./ParsaInterface/Messenger"
 
-class classAggregator extends generalConfig(keyConfig(timeConfig(Object))){
+class ClassAggregator extends Messenger(GeneralConfig(KeyConfig(TimeConfig(Object)))){
   constructor(){
     super()
   }
 }
 
-export class ParsaInterface extends classAggregator{
+export class ParsaInterface extends ClassAggregator{
 
   constructor(display, parsaGroup){
     super()
@@ -107,6 +108,11 @@ export class ParsaInterface extends classAggregator{
         }
       }else if( keyCodes[0] >= 65 && keyCodes[0] <= 90 ){
         switch( keyCodes[0] ){
+          case 81:
+            this.bouncer.debounced = false
+            this.state.hasUpdated = false
+            this.state.view = 'message'
+            break
           case 82:
             this.state.hasUpdated = false
             this.state.view = 'config'
@@ -152,6 +158,9 @@ export class ParsaInterface extends classAggregator{
           break
         case 'keys':
           this.keyConfigurator(keyCodes)
+          break
+        case 'message':
+          this.messenger(keyCodes)
           break
       }
     }else{

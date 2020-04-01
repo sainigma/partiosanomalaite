@@ -1,4 +1,4 @@
-export const generalConfig = (mix) => class extends mix{
+export const GeneralConfig = (mix) => class extends mix{
 
   constructor(){
     super()
