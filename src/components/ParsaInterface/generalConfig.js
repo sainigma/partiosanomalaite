@@ -15,47 +15,117 @@ export class generalConfig extends timeConfig{
     }
   }
 
-  callsignConfiguration(keyCodes){
-    //todo kumitus
+  codeSetter(code,letter){
+    let result
+    switch( 4 - code.split('_').length ){
+      case 2:
+        result = code.slice(0,2) + String.fromCharCode(letter)
+        break
+      case 1:
+        result = code.slice(0,1) + String.fromCharCode(letter) + '_'
+        break
+      default:
+        result = String.fromCharCode(letter) + '__'
+    }
+    console.log( result )
+    return result
+  }
+
+  codeEraser(code){
+    let result
+    switch( code.split('_').length ){
+      case 1:
+        result = code.slice(0,2) + '_'
+        break
+      case 2:
+        result = code.slice(0,1) + '__'
+        break
+      default:
+        result = '___'
+    }
+    return result
+  }
+
+  groupConfiguration(keyCodes){
     if( !this.state.hasUpdated ){
-      if( this.settings.callsign === '' ){
-        this.settings.callsign = '___'
+      this.settings.group = this.settings.group !== '' ? this.settings.group : '___'
+      this.settings.subgroup = this.settings.subgroup !== '' ? this.settings.subgroup : '___'
+      if( this.settings.group.split('_').length === 1 ){
+        this.display.setMessage(`ok?      ${this.settings.subgroup} ${this.settings.group}`)
+      }else this.display.setMessage(`         ${this.settings.subgroup} ${this.settings.group}`)
+      this.state.hasUpdated = true
+    }else if( keyCodes.length > 0 && this.bouncer.debounced ){
+      this.bouncer.debounced = false
+
+      if( keyCodes[0] > 64 && keyCodes < 91 ){
+        this.state.hasUpdated = false
+        if( this.settings.subgroup.split('_').length !== 1 ){
+          this.settings.subgroup = this.codeSetter(this.settings.subgroup, keyCodes[0])
+        }else this.settings.group = this.codeSetter(this.settings.group, keyCodes[0])
+      }else{
+        switch( keyCodes[0] ){
+          case 8:
+          case 221:
+            this.state.hasUpdated = false
+            if( this.settings.group.split('_').length === 4 ){
+              this.settings.subgroup = this.codeEraser(this.settings.subgroup)
+            }else this.settings.group = this.codeEraser(this.settings.group)
+            break
+          case 13:
+          case 192:
+            if( this.settings.subgroup.split('_').length === 1 ){
+              this.state.hasUpdated = false
+              this.state.subview = ''
+            }
+            break
+          case 35:
+          case 222:
+            this.state.hasUpdated = false
+            this.state.subview = ''
+            this.settings.group = ''
+            this.settings.subgroup = ''
+            break
+        }
       }
+    }
+  }
+
+  callsignConfiguration(keyCodes){
+    if( !this.state.hasUpdated ){
+      this.settings.callsign = this.settings.callsign !== '' ? this.settings.callsign : '___'
       if( this.settings.callsign.split('_').length === 1 ){
         this.display.setMessage(`ok?          ${ this.settings.callsign }`)
       }else this.display.setMessage(`             ${ this.settings.callsign }`)
       this.state.hasUpdated = true
-    }else if( keyCodes.length > 0 && keyCodes[0] > 64 && keyCodes[0] < 91){
-      if( this.bouncer.debounced ){
-        this.bouncer.debounced = false
-        const splitter = this.settings.callsign.split('_')
-        const index =  4 - splitter.length
-        switch(index){
-          case 0:
-            this.settings.callsign = String.fromCharCode(keyCodes[0]) + '__'
+
+    }else if( keyCodes.length > 0 && this.bouncer.debounced ){
+      this.bouncer.debounced = false
+
+      if( keyCodes[0] > 64 && keyCodes < 91 ){
+        this.settings.callsign = this.codeSetter(this.settings.callsign, keyCodes[0])
+        this.state.hasUpdated = false
+      }else{
+        switch( keyCodes[0] ){
+          case 8:
+          case 221:
+            this.settings.callsign = this.codeEraser(this.settings.callsign)
+            this.state.hasUpdated = false
             break
-          case 1:
-            this.settings.callsign = this.settings.callsign.slice(0,1) + String.fromCharCode(keyCodes[0]) + '_'
+          case 13:
+          case 192:
+            if( this.settings.callsign.split('_').length === 1 ){
+              this.state.hasUpdated = false
+              this.state.subview = ''
+            }
             break
-          case 2:
-            this.settings.callsign = this.settings.callsign.slice(0,2) + String.fromCharCode(keyCodes[0])
+          case 35:
+          case 222:
+            this.state.hasUpdated = false
+            this.state.subview = ''
+            this.settings.callsign = ''
             break
         }
-        this.state.hasUpdated = false
       }
-    }else if( keyCodes.length > 0 && (keyCodes[0] === 13 || keyCodes[0] === 192) && this.bouncer.debounced ){
-      this.bouncer.debounced = false
-      if( this.settings.callsign.split('_').length === 1 ){
-        this.state.hasUpdated = false
-        this.state.subview = ''
-        console.log("exit")
-      }
-    }else if( keyCodes.length > 0 && ( keyCodes[0] === 35 || keyCodes[0] === 222) && this.bouncer.debounced ){
-      this.bouncer.debounced = false
-      this.state.hasUpdated = false
-      this.state.subview = ''
-      console.log("exit")
-      this.settings.callsign = ''
     }
   }
 
@@ -65,7 +135,8 @@ export class generalConfig extends timeConfig{
         case 'callsign':
           this.callsignConfiguration(keyCodes)
           break
-        case 'group':
+        case 'groups':
+          this.groupConfiguration(keyCodes)
           break
       }
     }else this.configurationMenu(keyCodes)
@@ -79,7 +150,10 @@ export class generalConfig extends timeConfig{
     }
 
     const setGroups = () => {
-
+      this.state.subview = 'groups'
+      this.settings.group = ''
+      this.settings.subgroup = ''
+      this.state.hasUpdated = false
     }
 
     const toggleAck = () => {
@@ -121,7 +195,7 @@ export class generalConfig extends timeConfig{
 
     const submenus = [
       `Tunnus       ${ this.settings.callsign ? this.settings.callsign : '  ?' }`,
-      `Ryhmät    ${ this.settings.subgroup ? this.settings.subgroup : '  ?' }${ this.settings.group ? this.settings.group : '  ?' }`,
+      `Ryhmät   ${ this.settings.subgroup ? this.settings.subgroup : '  ?' } ${ this.settings.group ? this.settings.group : '  ?' }`,
       `Kuitt   ${ this.settings.ack ? '   autom' : 'ei autom' }`,
       `Lähtnop   ${ this.settings.speed === 0 ? ' 600bd' : this.settings.speed === 1 ? '1200bd' : '2400bd' }`,
       `${this.settings.boost ? 'Suuri taso' : 'Pieni taso'}`,
