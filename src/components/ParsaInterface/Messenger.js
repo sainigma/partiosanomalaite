@@ -2,6 +2,11 @@ export const Messenger = (mix) => class extends mix{
   constructor(){
     super()
     this.message = ''
+    this.destination = ''
+  }
+  resetMessenger(){
+    this.message=''
+    this.destination=''
   }
   shiftEnumerator(keyCode){
     const enumerator = {
@@ -22,7 +27,85 @@ export const Messenger = (mix) => class extends mix{
     else return keyCode
   }
 
-  messenger(keyCodes){
+  sendMessage(){
+    if( !this.state.hasUpdated ){
+      this.state.hasUpdated = true
+      this.display.setMessage('Lähetetään')
+    }
+    
+  }
+
+  prepareMessageSend(keyCodes){
+    const destinationLength = this.destination.split('_').length
+    if(!this.state.hasUpdated){
+      if( this.destination === '' ){
+        this.destination = '___'
+      }
+      this.state.hasUpdated = true
+      this.display.setMessage(`Asema=${this.destination}`)
+    }
+    if( keyCodes.length > 0 && this.bouncer.debounced ){
+      const keyCode = keyCodes[keyCodes.length-1]
+      if( keyCode > 64 && keyCode < 91 && destinationLength > 1 ){
+        this.bouncer.debounced = false
+        this.state.hasUpdated = false
+        this.destination = this.codeSetter(this.destination, keyCode)
+      }else{
+        this.bouncer.debounced = false
+        this.state.hasUpdated = false
+        switch(keyCode){
+          case 8:
+          case 221:
+            this.destination = this.codeEraser(this.destination)
+            break
+          case 13:
+          case 192:
+            this.state.subview = 'push'
+          case 35:
+          case 222:
+            this.destination = ''
+            this.backToMainmenu()
+            break
+          default:
+            this.bouncer.debounced = true
+            this.state.hasUpdated = true
+        }
+      }
+    }
+  }
+
+  cannotSend(keyCodes){
+    if( !this.state.hasUpdated ){
+      this.state.hasUpdated = true
+      if( this.settings.callsign !== '' && this.settings.subgroup !== '' ){
+        if( this.keys.key1 !== '' || this.keys.key2 !== '' ){
+          this.display.setMessage(`Tyhjä vstkenttä`)
+        }else{
+          this.display.setMessage(`Avain puuttuu`)
+        }
+      }else{
+        this.display.setMessage(`Vajaat asetukset`)
+      }
+    }
+    if( keyCodes.length > 0 && this.bouncer.debounced ){
+      const keyCode = keyCodes[keyCodes.length -1]
+      this.bouncer.debounced = false
+      this.state.hasUpdated = false
+      switch(keyCode){
+        case 13:
+        case 192:
+        case 35:
+        case 222:
+          this.backToMainmenu()
+          break
+        default:
+          this.bouncer.debounced = true
+          this.state.hasUpdated = true
+      }
+    }
+  }
+
+  composeMessage(keyCodes){
     if(!this.state.hasUpdated){
       this.state.hasUpdated = true
       this.display.setMessage(`Sanoma= ${this.message}`)
@@ -60,12 +143,25 @@ export const Messenger = (mix) => class extends mix{
             break
           case 35:
           case 222:
-            this.state.view = 'mainmenu'
-            this.state.hasUpdated = false
-            this.bouncer.debounced = false
+            this.backToMainmenu()
             break
         }
       }
+    }
+  }
+  messenger(keyCodes){
+    switch(this.state.subview){
+      case 'send':
+        this.prepareMessageSend(keyCodes)
+        break
+      case 'invalid':
+        this.cannotSend(keyCodes)
+        break
+      case 'push':
+        this.sendMessage()
+        break
+      default:
+        this.composeMessage(keyCodes)
     }
   }
 }

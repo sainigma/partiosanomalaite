@@ -13,14 +13,13 @@ export class ParsaInterface extends ClassAggregator{
 
   constructor(display, parsaGroup){
     super()
-    this.version = 'V 20200320A'
+    this.version = 'V 20200402A'
     this.parsaGroup = parsaGroup
     let date = new Date()
 
     this.state = {
       view:'off',
       subview:'',
-      input:'',
       hasUpdated:false,
       previousKey:0,
       previousKeysLength:0
@@ -75,7 +74,7 @@ export class ParsaInterface extends ClassAggregator{
 
       const waitDuration = epoch - this.bouncer.waitStart
       switch(true){
-        case waitDuration > 0.1:
+        case waitDuration > 8:
           this.state.view = 'time'
           this.bouncer.waitStart = 0
           break
@@ -92,40 +91,90 @@ export class ParsaInterface extends ClassAggregator{
     }
   }
 
+  backToMainmenu(){
+    this.state.view = 'mainmenu'
+    this.state.subview = ''
+    this.state.hasUpdated = false
+    this.bouncer.debounced = false
+  }
+
+  reset(keyCodes){
+    if( !this.state.hasUpdated ){
+      this.display.setMessage('Muistin tuho   ?')
+      this.state.hasUpdated = true
+    }
+    if( keyCodes.length > 0 && this.bouncer.debounced ){
+      const keyCode = keyCodes[keyCodes.length-1]
+      this.bouncer.debounced = false
+      this.state.hasUpdated = false
+      switch( keyCode ){
+        case 13:
+        case 192:
+          this.resetTime()
+          this.resetKeys()
+          this.resetGeneral()
+          this.resetMessenger()
+          this.state.view = 'intro'
+          break
+        case 35:
+        case 222:
+          this.backToMainmenu()
+          break
+        default:
+          this.bouncer.debounced = true
+          this.state.hasUpdated = true
+      }
+    }
+  }
+
   mainmenu(keyCodes){
     if( !this.state.hasUpdated ){
       this.display.setMessage('TOIMINTA       ?')
       this.state.hasUpdated = true
     }else{
       if( keyCodes.length === 2 && ( keyCodes[0] === 16 || keyCodes[0] === 60 ) ){
+        this.bouncer.debounced = false
+        this.state.hasUpdated = false
         switch( keyCodes[1] ){
           case 69:
-            this.bouncer.debounced = false
-            this.state.hasUpdated = false
             this.state.view = 'keys'
             this.state.subview = 'new'
             break
+          case 73:
+            this.state.view = 'reset'
+            break
+          default:
+            this.bouncer.debounced = true
+            this.state.hasUpdated = true
         }
       }else if( keyCodes[0] >= 65 && keyCodes[0] <= 90 ){
+        this.bouncer.debounced = false
+        this.state.hasUpdated = false
         switch( keyCodes[0] ){
           case 81:
-            this.bouncer.debounced = false
-            this.state.hasUpdated = false
+            this.state.view = 'message'
+            break
+          case 84:
+            if( this.settingsAreValid() ){
+              this.state.subview = 'send'
+            }else{
+              this.state.subview = 'invalid'
+            }
             this.state.view = 'message'
             break
           case 82:
-            this.state.hasUpdated = false
             this.state.view = 'config'
             break
           case 80:
-            this.state.hasUpdated = false
             this.state.view = 'time'
             break
           case 69:
-            this.state.hasUpdated = false
             this.state.view = 'keys'
             this.state.subview = ''
             break
+          default:
+            this.bouncer.debounced = true
+            this.state.hasUpdated = true
         }
       }
     }
@@ -161,6 +210,9 @@ export class ParsaInterface extends ClassAggregator{
           break
         case 'message':
           this.messenger(keyCodes)
+          break
+        case 'reset':
+          this.reset(keyCodes)
           break
       }
     }else{

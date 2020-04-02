@@ -4,6 +4,11 @@ export const TimeConfig = (mix) => class extends mix{
     super()
     this.time = 0
   }
+
+  resetTime(){
+    this.time = 0
+  }
+
   setTime(keyCodes){
     const baseMessage = 'AIKA ?      '
     if( !this.state.hasUpdated ){

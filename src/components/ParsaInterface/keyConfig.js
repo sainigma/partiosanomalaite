@@ -13,6 +13,14 @@ export const KeyConfig = (mix) => class extends mix{
     }
   }
 
+  resetKeys(){
+    this.keys.key1=''
+    this.keys.key2=''
+    this.keys.firstActive=true
+    this.checksums.key1=''
+    this.checksums.key2=''
+  }
+
   topRowToNumeric(keyCode){
     const enumerator = {
       81:49,
@@ -33,7 +41,6 @@ export const KeyConfig = (mix) => class extends mix{
   setKeys(keyCodes) {
     let key = this.keys.firstActive ? this.keys.key1 : this.keys.key2
     const keysLength = key.replace(/ /g, '').length
-    console.log(keysLength)
     if (!this.state.hasUpdated) {
       this.state.hasUpdated = true
       if (keysLength < 32) {
@@ -133,16 +140,16 @@ export const KeyConfig = (mix) => class extends mix{
           case 188:
           case 37:
           case 39:
-            this.bouncer.debounced = false
-            this.state.hasUpdated = false
-            this.keys.firstActive = !this.keys.firstActive
+            if( this.keys.key1 !== '' || this.keys.key2 !== '' ){
+              this.bouncer.debounced = false
+              this.state.hasUpdated = false
+              this.keys.firstActive = !this.keys.firstActive
+            }
             break
           case 35:
           case 221:
-            this.bouncer.debounced = false
-            this.state.hasUpdated = false
             this.keys.firstActive = true
-            this.state.view = 'mainmenu'
+            this.backToMainmenu()
             break
         }
       }

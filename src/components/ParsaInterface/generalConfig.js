@@ -13,6 +13,27 @@ export const GeneralConfig = (mix) => class extends mix{
     }
   }
 
+  resetGeneral(){
+    this.settings = {
+      index:0,
+      callsign:'',
+      subgroup:'',
+      group:'',
+      ack:true,
+      speed:2,
+      boost:false
+    }
+  }
+
+  settingsAreValid(){
+    return (
+      this.settings.callsign !== '' &&
+      this.settings.subgroup !== '' &&
+      this.message !== '' &&
+      (this.keys.key1 !== '' || this.keys.key2 !== '')
+    )
+  }
+
   codeSetter(code,letter){
     let result
     switch( 4 - code.split('_').length ){
@@ -25,7 +46,6 @@ export const GeneralConfig = (mix) => class extends mix{
       default:
         result = String.fromCharCode(letter) + '__'
     }
-    console.log( result )
     return result
   }
 

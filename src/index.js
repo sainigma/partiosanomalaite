@@ -63,8 +63,9 @@ const update = () => {
   keyboard.moveKeys( keysDown )
   cameraPivot.rotation.set(0,3*(mouse.x/1920),0)
   cameraPivot.scale.set(zoom, zoom, zoom)
-  parsaInterface.update( keysDown, epoch )
-  if( epoch - lastRefreshed > 4.16E-4 ){
+  
+  if( epoch - lastRefreshed > 0.001 ){
+    parsaInterface.update( keysDown, epoch )
     lastRefreshed = epoch
     segmentDisplay.update(epoch)
   }
