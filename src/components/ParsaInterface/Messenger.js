@@ -3,10 +3,16 @@ export const Messenger = (mix) => class extends mix{
     super()
     this.message = ''
     this.destination = ''
+    this.transmissionStart = 0
+    this.success = 0
   }
   resetMessenger(){
     this.message=''
     this.destination=''
+    this.transmissionStart = 0
+  }
+  transmissionWaitingResponse(){
+    return this.transmissionStart !== 0 && this.success === 0
   }
   shiftEnumerator(keyCode){
     const enumerator = {
@@ -27,12 +33,36 @@ export const Messenger = (mix) => class extends mix{
     else return keyCode
   }
 
-  sendMessage(){
+  sendMessage(keyCodes,epoch){
     if( !this.state.hasUpdated ){
-      this.state.hasUpdated = true
-      this.display.setMessage('Lähetetään')
+      if( this.transmissionStart === 0 ){
+        this.display.setMessage('Lähetetään')
+        this.transmissionStart = epoch
+      }else if(this.success === 400){
+        this.state.hasUpdated = true
+        this.display.setMessage('Linja varattu')
+      }else if(this.success === 200){
+        this.state.hasUpdated = true
+        this.display.setMessage('Lähetetty')
+      }else if( this.success === 0 && epoch - this.transmissionStart > 10 ){
+        this.success = 400
+      }
+    }else if(this.success !== 0 && keyCodes.length > 0 ){
+      const keyCode = keyCodes[keyCodes.length-1]
+      switch(keyCode){
+        case 13:
+        case 192:
+        case 35:
+        case 222:
+          if( this.success === 200 ){
+            this.message = ''
+          }
+          this.transmissionStart = 0
+          this.success = 0
+          this.backToMainmenu()
+          break
+      }
     }
-    
   }
 
   prepareMessageSend(keyCodes){
@@ -61,6 +91,7 @@ export const Messenger = (mix) => class extends mix{
           case 13:
           case 192:
             this.state.subview = 'push'
+            break
           case 35:
           case 222:
             this.destination = ''
@@ -149,7 +180,7 @@ export const Messenger = (mix) => class extends mix{
       }
     }
   }
-  messenger(keyCodes){
+  messenger(keyCodes,epoch){
     switch(this.state.subview){
       case 'send':
         this.prepareMessageSend(keyCodes)
@@ -158,7 +189,7 @@ export const Messenger = (mix) => class extends mix{
         this.cannotSend(keyCodes)
         break
       case 'push':
-        this.sendMessage()
+        this.sendMessage(keyCodes,epoch)
         break
       default:
         this.composeMessage(keyCodes)

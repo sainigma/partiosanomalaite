@@ -94,6 +94,9 @@ export const GeneralConfig = (mix) => class extends mix{
             if( this.settings.subgroup.split('_').length === 1 ){
               this.state.hasUpdated = false
               this.state.subview = ''
+              if( this.settings.group.split('_').length !== 1 ){
+                this.settings.group = ''
+              }
             }
             break
           case 35:

@@ -70,7 +70,6 @@ export const TimeConfig = (mix) => class extends mix{
             let currentInput = this.state.input
             currentInput = currentInput.replace(/_/g,'')
             let newInput = currentInput.slice(0,currentInput.length-1)
-            console.log(newInput)
             switch( newInput.length ){
               case 0:
                 newInput += '____'
@@ -100,9 +99,6 @@ export const TimeConfig = (mix) => class extends mix{
               this.state.hasUpdated = false
             }
           }
-        }else if( keyCodes.length === 0 || (keyCodes.length === 1 && (keyCodes[0] === 16 || keyCodes[0] === 60)) ){
-          this.bouncer.debounced = true
-          console.log( "debounced" )
         }
     }
   }

@@ -37,6 +37,26 @@ export const KeyConfig = (mix) => class extends mix{
     if( enumerator[keyCode] !== undefined ) return enumerator[keyCode]
     else return keyCode
   }
+  
+  generateChecksum(key){
+    const hash = (s) => {
+      let hash = 0
+      for(let i=0; i<8; i++){
+        hash += s.charCodeAt(i)*(i+1)
+      }
+      return String.fromCharCode((hash & 25)+65)
+    }
+    let blocks = [
+      key.slice(0,8),
+      key.slice(8,16),
+      key.slice(16,24),
+      key.slice(24,32)
+    ]
+    blocks = blocks.map( block => {
+      return hash(block)
+    })
+    return blocks[0]+blocks[1]+blocks[2]+blocks[3]
+  }
 
   setKeys(keyCodes) {
     let key = this.keys.firstActive ? this.keys.key1 : this.keys.key2
@@ -47,10 +67,12 @@ export const KeyConfig = (mix) => class extends mix{
         this.display.setMessage(`Avain${this.keys.firstActive ? 1 : 2}=${key}`)
         this.display.moveToLast()
       } else {
-        if (this.keys.firstActive) {
-          this.checksums.key1 = 'KEY1'
-        } else this.checksums.key2 = 'KEY2'
-        const keyChecksum = this.keys.firstActive ? this.checksums.key1 : this.checksums.key2
+        const keyChecksum = this.keys.firstActive ? this.generateChecksum(this.keys.key1) : this.generateChecksum(this.keys.key2)
+        if( this.keys.firstActive ){
+          this.checksums.key1 = keyChecksum
+        }else{
+          this.checksums.key2 = keyChecksum
+        }
         this.display.setMessage(`${key}= ${keyChecksum} ok?`)
         this.display.moveToLast()
       }
@@ -87,10 +109,11 @@ export const KeyConfig = (mix) => class extends mix{
           case 13:
           case 192:
             if( keysLength === 32 ){
+              key = key.replace(/ /g, '')
               if (this.keys.firstActive) {
-                this.keys.key1 = key.replace(/ /g, '')
+                this.keys.key1 = key
               } else {
-                this.keys.key2 = key.replace(/ /g, '')
+                this.keys.key2 = key
               }
               this.state.subview = ''
               this.state.hasUpdated = false

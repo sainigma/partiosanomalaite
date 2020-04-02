@@ -74,7 +74,7 @@ export class ParsaInterface extends ClassAggregator{
 
       const waitDuration = epoch - this.bouncer.waitStart
       switch(true){
-        case waitDuration > 8:
+        case waitDuration > 0.1:
           this.state.view = 'time'
           this.bouncer.waitStart = 0
           break
@@ -209,7 +209,7 @@ export class ParsaInterface extends ClassAggregator{
           this.keyConfigurator(keyCodes)
           break
         case 'message':
-          this.messenger(keyCodes)
+          this.messenger(keyCodes, epoch)
           break
         case 'reset':
           this.reset(keyCodes)
