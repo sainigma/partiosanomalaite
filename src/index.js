@@ -6,12 +6,13 @@ import { EnviroSphere } from './objects/EnviroSphere'
 import { KeyListener } from './components/KeyListener'
 import { MouseListener } from './components/MouseListener'
 import { ParsaInterface } from './components/ParsaInterface'
+import { ServerComms } from './components/ServerComms'
 import './styles.css'
 
 let camera,scene,renderer
 let parsaGroup,cameraPivot
 let segmentDisplay,parsa,enviroSphere,keyboard
-let keyListener, mouseListener, parsaInterface
+let keyListener, mouseListener, parsaInterface, serverComms
 
 const init = () => {
   let container
@@ -47,6 +48,7 @@ const init = () => {
   scene.rotateOnWorldAxis(new THREE.Vector3(0,1,0),-3.141*0.7)
   keyListener = new KeyListener()
   mouseListener = new MouseListener()
+  serverComms = new ServerComms()
   parsaInterface = new ParsaInterface(segmentDisplay, parsaGroup)
 }
 
@@ -65,7 +67,7 @@ const update = () => {
   cameraPivot.scale.set(zoom, zoom, zoom)
   
   if( epoch - lastRefreshed > 0.001 ){
-    parsaInterface.update( keysDown, epoch )
+    parsaInterface.update( keysDown, epoch, serverComms )
     lastRefreshed = epoch
     segmentDisplay.update(epoch)
   }
