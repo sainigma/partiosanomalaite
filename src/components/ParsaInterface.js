@@ -11,7 +11,7 @@ class ClassAggregator extends Messenger(GeneralConfig(KeyConfig(TimeConfig(Objec
 
 export class ParsaInterface extends ClassAggregator{
 
-  constructor(display, parsaGroup){
+  constructor(display, parsaGroup, serverComms){
     super()
     this.version = 'V 20200402A'
     this.parsaGroup = parsaGroup
@@ -35,6 +35,7 @@ export class ParsaInterface extends ClassAggregator{
       year:date.getFullYear()
     }
     this.display = display
+    this.serverComms = serverComms
   }
 
   offState(keyCodes,epoch){
@@ -65,6 +66,8 @@ export class ParsaInterface extends ClassAggregator{
       this.parsaGroup.rotation.set(120,ogRot.y,ogRot.z)
       this.bouncer.waitStart = epoch
       this.display.setMessage( '................' )
+      console.log("intro alkoi")
+      this.serverComms.send('handshake','yk')
     }else{
       const messages = [
         this.version,
@@ -74,7 +77,7 @@ export class ParsaInterface extends ClassAggregator{
 
       const waitDuration = epoch - this.bouncer.waitStart
       switch(true){
-        case waitDuration > 0.1:
+        case waitDuration > 8:
           this.state.view = 'time'
           this.bouncer.waitStart = 0
           break

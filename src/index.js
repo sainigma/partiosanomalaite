@@ -49,7 +49,7 @@ const init = () => {
   keyListener = new KeyListener()
   mouseListener = new MouseListener()
   serverComms = new ServerComms()
-  parsaInterface = new ParsaInterface(segmentDisplay, parsaGroup)
+  parsaInterface = new ParsaInterface(segmentDisplay, parsaGroup, serverComms)
 }
 
 const animate = () => {
