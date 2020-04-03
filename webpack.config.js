@@ -33,7 +33,8 @@ const config = {
     }),
     new CopyWebPackPlugin([
       {from:'./public/textures',to:'textures'},
-      {from:'./public/models',to:'models'}
+      {from:'./public/models',to:'models'},
+      {from:'./public/sounds',to:'sounds'},
     ])
   ],
   stats:{

@@ -28,7 +28,6 @@ export const GeneralConfig = (mix) => class extends mix{
   settingsAreValid(){
     return (
       this.settings.callsign !== '' &&
-      this.settings.subgroup !== '' &&
       this.message !== '' &&
       (this.keys.key1 !== '' || this.keys.key2 !== '')
     )
@@ -97,6 +96,10 @@ export const GeneralConfig = (mix) => class extends mix{
               if( this.settings.group.split('_').length !== 1 ){
                 this.settings.group = ''
               }
+              this.serverComms.updateSettings({
+                group:this.settings.group,
+                subgroup:this.settings.subgroup
+              })
             }
             break
           case 35:
@@ -137,6 +140,7 @@ export const GeneralConfig = (mix) => class extends mix{
             if( this.settings.callsign.split('_').length === 1 ){
               this.state.hasUpdated = false
               this.state.subview = ''
+              this.serverComms.updateSettings({callsign:this.settings.callsign})
             }
             break
           case 35:

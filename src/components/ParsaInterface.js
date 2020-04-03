@@ -11,11 +11,13 @@ class ClassAggregator extends Messenger(GeneralConfig(KeyConfig(TimeConfig(Objec
 
 export class ParsaInterface extends ClassAggregator{
 
-  constructor(display, parsaGroup, serverComms){
+  constructor(display, parsaGroup, serverComms, audioPlayer){
     super()
     this.version = 'V 20200402A'
     this.parsaGroup = parsaGroup
     let date = new Date()
+
+    this.skipIntro = true
 
     this.state = {
       view:'off',
@@ -36,6 +38,8 @@ export class ParsaInterface extends ClassAggregator{
     }
     this.display = display
     this.serverComms = serverComms
+    this.audioPlayer = audioPlayer
+    this.serverComms.send('handshake','yk')
   }
 
   offState(keyCodes,epoch){
@@ -77,7 +81,7 @@ export class ParsaInterface extends ClassAggregator{
 
       const waitDuration = epoch - this.bouncer.waitStart
       switch(true){
-        case waitDuration > 8:
+        case waitDuration > (this.skipIntro ? 0.1 : 8):
           this.state.view = 'time'
           this.bouncer.waitStart = 0
           break

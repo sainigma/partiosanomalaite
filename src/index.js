@@ -7,12 +7,13 @@ import { KeyListener } from './components/KeyListener'
 import { MouseListener } from './components/MouseListener'
 import { ParsaInterface } from './components/ParsaInterface'
 import { ServerComms } from './components/ServerComms'
+import { AudioPlayer } from './components/AudioPlayer'
 import './styles.css'
 
 let camera,scene,renderer
 let parsaGroup,cameraPivot
 let segmentDisplay,parsa,enviroSphere,keyboard
-let keyListener, mouseListener, parsaInterface, serverComms
+let keyListener, mouseListener, parsaInterface, serverComms, audioPlayer
 
 const init = () => {
   let container
@@ -48,18 +49,24 @@ const init = () => {
   scene.rotateOnWorldAxis(new THREE.Vector3(0,1,0),-3.141*0.7)
   keyListener = new KeyListener()
   mouseListener = new MouseListener()
-  serverComms = new ServerComms()
-  parsaInterface = new ParsaInterface(segmentDisplay, parsaGroup, serverComms)
+  audioPlayer = new AudioPlayer()
+  serverComms = new ServerComms(audioPlayer)
+  parsaInterface = new ParsaInterface(segmentDisplay, parsaGroup, serverComms, audioPlayer)
 }
 
 const animate = () => {
   requestAnimationFrame(animate)
   update()
 }
+
 let lastRefreshed = Date.now()/1E3
+
 const update = () => {
   const epoch = Date.now()/1E3
   const keysDown = keyListener.getKeysDown()
+  if( keysDown.length > 0 ){
+    audioPlayer.activate()
+  }
   const mouse = mouseListener.getDeltas()
   const zoom = 1-mouse.y/1080
   keyboard.moveKeys( keysDown )

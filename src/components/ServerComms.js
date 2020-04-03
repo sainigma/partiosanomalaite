@@ -1,33 +1,53 @@
 export class ServerComms{
-  constructor(){
+  constructor(audioPlayer){
     this.messages = []
 
-    this.frequency = 84.225
-    this.callsign = ''
-    this.group = ''
-    this.subgroup = ''
-    this.checksum1 = ''
-    this.checksum2 = ''
-
-    this.socket = new WebSocket('ws://localhost:8080')
-    this.socket.onmessage = this.incomingMessage
-    this.socket.onopen = (transmission) => {
-      this.socket.send(transmission)
+    this.settings = {
+      frequency: 84.225,
+      callsign: '',
+      group: '',
+      subgroup: '',
+      checksum1: '',
+      checksum2: '',
     }
-    
+    this.success = 0
+
+    this.audioPlayer = audioPlayer
+    console.log(audioPlayer)
+    this.socket = new WebSocket('ws://localhost:8080')
+    this.socket.onmessage = (event) => {this.incomingMessage(event)}
+    this.socket.onopen = (transmission) => {
+      try{
+        this.socket.send(transmission)
+      }catch(e){}
+      
+    }
     this.hasHandshakes = false
     this.hasMessages = false
+
+    
+  }
+
+  sendMessage(destination, content, checksum){
+    let transmission = {
+      type:'transmit',
+      destination,
+      content,
+      checksum
+    }
+    transmission = JSON.stringify(transmission)
+    this.socket.onopen(transmission)
   }
 
   sendSettings(){
     let transmission = {
       type:'settings',
-      frequency,
-      callsign,
-      group,
-      subgroup,
-      checksum1,
-      checksum2,
+      frequency:this.settings.frequency,
+      callsign:this.settings.callsign,
+      group:this.settings.group,
+      subgroup:this.settings.subgroup,
+      checksum1:this.settings.checksum1,
+      checksum2:this.settings.checksum2,
     }
     transmission = JSON.stringify(transmission)
     this.socket.onopen(transmission)
@@ -35,19 +55,20 @@ export class ServerComms{
 
   updateFrequency(frequency){
     if( frequency >= 30 && frequency <= 85.975 ){
-      this.frequency = frequency
+      this.settings.frequency = frequency
       this.sendSettings()
       return true
     }else return false
   }
 
-  updateParsaSettings(callsign, group, subgroup, checksum1, checksum2){
-    this.callsign = callsign !== '' ? callsign : this.callsign
-    this.group = group !== '' ? group : this.group
-    this.subgroup = subgroup !== '' ? subgroup : this.subgroup
-    this.checksum1 = checksum1 !== '' ? checksum1 : this.checksum1
-    this.checksum2 = checksum2 !== '' ? checksum2 : this.checksum2
-    if( this.callsign !== '' && ( this.checksum1 !== '' || this.checksum2 !== '' ) ){
+  updateSettings(params){
+    this.settings.callsign = params.callsign !== undefined ? params.callsign : this.settings.callsign
+    this.settings.group = params.group !== undefined ? params.group : this.settings.group
+    this.settings.subgroup = params.subgroup !== undefined ? params.subgroup : this.settings.subgroup
+    this.settings.checksum1 = params.checksum1 !== undefined ? params.checksum1 : this.settings.checksum1
+    this.settings.checksum2 = params.checksum2 !== undefined ? params.checksum2 : this.settings.checksum2
+    console.log(this.settings)
+    if( this.settings.callsign !== '' && ( this.settings.checksum1 !== '' || this.settings.checksum2 !== '' ) ){
       this.sendSettings()
     }
   }
@@ -64,6 +85,10 @@ export class ServerComms{
     this.socket.onopen(transmission)
   }
 
+  ack(){
+    this.success = 0
+  }
+
   incomingMessage(event){
     try{
       const transmission = JSON.parse(event.data)
@@ -71,14 +96,21 @@ export class ServerComms{
         case 'handshake':
           this.hasHandshakes = true
           console.log('yk')
+          this.audioPlayer.play('yk')
           break
         case 'burst':
+          this.audioPlayer.play('burst')
+          console.log(transmission)
           console.log('brrrrrr')
           break
+        case 'transmitOk':
+          this.audioPlayer.play('burst')
+          this.success = 200
+          break
         case 'message':
+          console.log(transmission)
           this.messages.push(transmission)
           this.hasMessages = true
-          console.log(transmission.message)
           break
       }
     }catch(error){}

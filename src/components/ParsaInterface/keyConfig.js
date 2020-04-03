@@ -115,6 +115,10 @@ export const KeyConfig = (mix) => class extends mix{
               } else {
                 this.keys.key2 = key
               }
+              this.serverComms.updateSettings({
+                checksum1:this.checksums.key1,
+                checksum2:this.checksums.key2
+              })
               this.state.subview = ''
               this.state.hasUpdated = false
               this.bouncer.debounced = false

@@ -36,8 +36,11 @@ export const Messenger = (mix) => class extends mix{
   sendMessage(keyCodes,epoch){
     if( !this.state.hasUpdated ){
       if( this.transmissionStart === 0 ){
-        this.display.setMessage('Lähetetään')
-        this.transmissionStart = epoch
+        if( this.audioPlayer.paused('burst') ){
+          this.serverComms.sendMessage(this.destination, this.message, this.checksums.key1 )
+          this.display.setMessage('Lähetetään')
+          this.transmissionStart = epoch
+        }
       }else if(this.success === 400){
         this.state.hasUpdated = true
         this.display.setMessage('Linja varattu')
@@ -46,6 +49,9 @@ export const Messenger = (mix) => class extends mix{
         this.display.setMessage('Lähetetty')
       }else if( this.success === 0 && epoch - this.transmissionStart > 10 ){
         this.success = 400
+      }else if( this.serverComms.success === 200 && this.audioPlayer.paused('burst') ){
+        this.success = 200
+        this.serverComms.ack()
       }
     }else if(this.success !== 0 && keyCodes.length > 0 ){
       const keyCode = keyCodes[keyCodes.length-1]
@@ -108,7 +114,7 @@ export const Messenger = (mix) => class extends mix{
   cannotSend(keyCodes){
     if( !this.state.hasUpdated ){
       this.state.hasUpdated = true
-      if( this.settings.callsign !== '' && this.settings.subgroup !== '' ){
+      if( this.settings.callsign !== '' ){
         if( this.keys.key1 !== '' || this.keys.key2 !== '' ){
           this.display.setMessage(`Tyhjä vstkenttä`)
         }else{

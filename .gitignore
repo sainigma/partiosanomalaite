@@ -11,6 +11,7 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
 public/models/
 public/textures/
+public/sounds/
 # Runtime data
 pids
 *.pid
