@@ -89,6 +89,13 @@ export class ServerComms{
     this.success = 0
   }
 
+  getMessages(){
+    const messages = this.messages
+    this.messages = []
+    this.hasMessages = false
+    return messages
+  }
+
   incomingMessage(event){
     try{
       const transmission = JSON.parse(event.data)
@@ -108,9 +115,12 @@ export class ServerComms{
           this.success = 200
           break
         case 'message':
+          this.audioPlayer.play('burst')
           console.log(transmission)
-          this.messages.push(transmission)
-          this.hasMessages = true
+          if( this.messages.length < 8 ){
+            this.messages.push(transmission)
+            this.hasMessages = true
+          }
           break
       }
     }catch(error){}

@@ -40,6 +40,9 @@ export class ParsaInterface extends ClassAggregator{
     this.serverComms = serverComms
     this.audioPlayer = audioPlayer
     this.serverComms.send('handshake','yk')
+
+    this.messages = ['asd','asd']
+    this.newMessages = false
   }
 
   offState(keyCodes,epoch){
@@ -134,56 +137,80 @@ export class ParsaInterface extends ClassAggregator{
     }
   }
 
+  messageNotification(keyCodes){
+    if( !this.state.hasUpdated ){
+      this.display.setMessage('Viestejä')
+      this.state.hasUpdated = true
+    }else if( keyCodes.length > 0 ){
+      const lastKey = keyCodes[keyCodes.length-1]
+      if( lastKey === 85 && this.bouncer.debounced ){
+        this.bouncer.debounced = false
+        this.newMessages = false
+        this.state.hasUpdated = true
+      }else{
+        this.mainmenuLogic(keyCodes)
+      }
+    }
+  }
+
+  mainmenuLogic(keyCodes){
+    if( keyCodes.length === 2 && ( keyCodes[0] === 16 || keyCodes[0] === 60 ) ){
+      this.bouncer.debounced = false
+      this.state.hasUpdated = false
+      switch( keyCodes[1] ){
+        case 69:
+          this.state.view = 'keys'
+          this.state.subview = 'new'
+          break
+        case 73:
+          this.state.view = 'reset'
+          break
+        default:
+          this.bouncer.debounced = true
+          this.state.hasUpdated = true
+      }
+    }else if( keyCodes[0] >= 65 && keyCodes[0] <= 90 ){
+      this.bouncer.debounced = false
+      this.state.hasUpdated = false
+      switch( keyCodes[0] ){
+        case 81:
+          this.state.view = 'message'
+          break
+        case 87:
+          this.inboxselection = -1
+          this.state.view = 'inbox'
+          break
+        case 84:
+          if( this.settingsAreValid() ){
+            this.state.subview = 'send'
+          }else{
+            this.state.subview = 'invalid'
+          }
+          this.state.view = 'message'
+          break
+        case 82:
+          this.state.view = 'config'
+          break
+        case 80:
+          this.state.view = 'time'
+          break
+        case 69:
+          this.state.view = 'keys'
+          this.state.subview = ''
+          break
+        default:
+          this.bouncer.debounced = true
+          this.state.hasUpdated = true
+      }
+    }
+  }
+
   mainmenu(keyCodes){
     if( !this.state.hasUpdated ){
       this.display.setMessage('TOIMINTA       ?')
       this.state.hasUpdated = true
     }else{
-      if( keyCodes.length === 2 && ( keyCodes[0] === 16 || keyCodes[0] === 60 ) ){
-        this.bouncer.debounced = false
-        this.state.hasUpdated = false
-        switch( keyCodes[1] ){
-          case 69:
-            this.state.view = 'keys'
-            this.state.subview = 'new'
-            break
-          case 73:
-            this.state.view = 'reset'
-            break
-          default:
-            this.bouncer.debounced = true
-            this.state.hasUpdated = true
-        }
-      }else if( keyCodes[0] >= 65 && keyCodes[0] <= 90 ){
-        this.bouncer.debounced = false
-        this.state.hasUpdated = false
-        switch( keyCodes[0] ){
-          case 81:
-            this.state.view = 'message'
-            break
-          case 84:
-            if( this.settingsAreValid() ){
-              this.state.subview = 'send'
-            }else{
-              this.state.subview = 'invalid'
-            }
-            this.state.view = 'message'
-            break
-          case 82:
-            this.state.view = 'config'
-            break
-          case 80:
-            this.state.view = 'time'
-            break
-          case 69:
-            this.state.view = 'keys'
-            this.state.subview = ''
-            break
-          default:
-            this.bouncer.debounced = true
-            this.state.hasUpdated = true
-        }
-      }
+      this.mainmenuLogic(keyCodes)
     }
   }
   
@@ -204,7 +231,8 @@ export class ParsaInterface extends ClassAggregator{
           this.intro(epoch)
           break
         case 'mainmenu':
-          this.mainmenu(keyCodes)
+          if( this.newMessages ) this.messageNotification(keyCodes)
+          else this.mainmenu(keyCodes)
           break
         case 'time':
           this.setTime(keyCodes)
@@ -218,10 +246,17 @@ export class ParsaInterface extends ClassAggregator{
         case 'message':
           this.messenger(keyCodes, epoch)
           break
+        case 'inbox':
+          this.inbox(keyCodes)
+          break
         case 'reset':
           this.reset(keyCodes)
           break
       }
+    }else if( this.serverComms.hasMessages && this.audioPlayer.paused('burst') ){
+      this.messages = [ ...this.messages, ...this.serverComms.getMessages() ]
+      this.newMessages = true
+      this.state.hasUpdated = false
     }else{
       this.bouncer.debounced = true
       this.state.previousKey = 0

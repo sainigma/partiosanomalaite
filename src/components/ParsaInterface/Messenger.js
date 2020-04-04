@@ -5,6 +5,7 @@ export const Messenger = (mix) => class extends mix{
     this.destination = ''
     this.transmissionStart = 0
     this.success = 0
+    this.inboxselection = 0
   }
   resetMessenger(){
     this.message=''
@@ -186,6 +187,80 @@ export const Messenger = (mix) => class extends mix{
       }
     }
   }
+
+  readMessage(keyCodes){
+
+  }
+
+  changeInboxSelection(value){
+    this.state.hasUpdated = false
+    if( this.messages.length > 1 ){
+      this.inboxselection += value
+      if( this.inboxselection > (this.messages.length -1) ) this.inboxselection = 0
+      else if( this.inboxselection < 0 ) this.inboxselection = this.messages.length - 1
+    }else if( this.messages.length === 1){
+      this.inboxselection = 0
+    }else this.inboxselection = -1
+  }
+
+  inbox(keyCodes) {
+    if (this.state.subview === 'read') {
+      this.readMessage(keyCodes)
+    } else {
+      if (!this.state.hasUpdated) {
+        this.state.hasUpdated = true
+        if( this.inboxselection === -1 ){
+          switch (this.messages.length) {
+            case 0:
+              this.display.setMessage('Ei viestejä')
+              break
+            case 1:
+              this.display.setMessage('1 viesti')
+              break
+            default:
+              this.display.setMessage(`Valitse Vst= 1-${this.messages.length}`)
+          }
+        }else{
+          this.display.setMessage(`${this.inboxselection+1}=1343   Läh=AAA`)
+        }
+      }else if( keyCodes.length > 0 && this.bouncer.debounced ){
+        this.bouncer.debounced = false
+        const lastKey = keyCodes[keyCodes.length-1]
+        const shifted = keyCodes[0] === 16 || keyCodes[0] === 60 ? true : false
+        if( shifted ){
+          //jos selausmode päällä:
+          ////Hävitys
+          ////Kopiointi
+
+          //jos normimodessa:
+          ////Hävitys, poistaa kaikki
+          ////Numeroilla pääsee viesteihin
+        }else{
+          switch(lastKey){
+            case 13:
+            case 192:
+              if( this.inboxselection !== -1 ){
+                //avaa viesti
+              }
+              break
+            case 37:
+            case 188:
+              this.changeInboxSelection(-1)
+              break
+            case 39:
+            case 173:
+              this.changeInboxSelection(1)
+              break
+            case 35:
+            case 222:
+              this.backToMainmenu()
+              break
+          }
+        }
+      }
+    }
+  }
+
   messenger(keyCodes,epoch){
     switch(this.state.subview){
       case 'send':
