@@ -41,7 +41,18 @@ export class ParsaInterface extends ClassAggregator{
     this.audioPlayer = audioPlayer
     this.serverComms.send('handshake','yk')
 
-    this.messages = ['asd','asd']
+    this.messages = [
+      {
+        time:1586100737382,
+        content:'Eka viesti',
+        sender:'BBB'
+      },
+      {
+        time:1586100737382,
+        content:'Toka viesti',
+        sender:'BBB'
+      },
+    ]
     this.newMessages = false
   }
 

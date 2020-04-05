@@ -47,9 +47,9 @@ const init = () => {
   parsaGroup.rotation.set(0,0,0)
   scene.add(cameraPivot)
   scene.rotateOnWorldAxis(new THREE.Vector3(0,1,0),-3.141*0.7)
-  keyListener = new KeyListener()
-  mouseListener = new MouseListener()
   audioPlayer = new AudioPlayer()
+  keyListener = new KeyListener(audioPlayer)
+  mouseListener = new MouseListener()
   serverComms = new ServerComms(audioPlayer)
   parsaInterface = new ParsaInterface(segmentDisplay, parsaGroup, serverComms, audioPlayer)
 }
@@ -64,14 +64,17 @@ let lastRefreshed = Date.now()/1E3
 const update = () => {
   const epoch = Date.now()/1E3
   const keysDown = keyListener.getKeysDown()
-  if( keysDown.length > 0 ){
-    audioPlayer.activate()
-  }
   const mouse = mouseListener.getDeltas()
   const zoom = 1-mouse.y/1080
   keyboard.moveKeys( keysDown )
-  cameraPivot.rotation.set(0,3*(mouse.x/1920),0)
-  cameraPivot.scale.set(zoom, zoom, zoom)
+  if( mouseListener.mouse >= 4 ){
+    cameraPivot.rotateOnWorldAxis( new THREE.Vector3(0,1,0), mouse.x/1e4 )
+    cameraPivot.rotateOnWorldAxis( new THREE.Vector3(1,0,0), mouse.y/1e4 )
+
+    console.log( cameraPivot.rotation )
+    //cameraPivot.rotation.set(0,3*(mouse.x/1920),0)
+    //cameraPivot.scale.set(zoom, zoom, zoom)
+  }
   
   if( epoch - lastRefreshed > 0.001 ){
     parsaInterface.update( keysDown, epoch, serverComms )

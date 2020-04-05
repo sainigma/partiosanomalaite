@@ -13,7 +13,6 @@ export class ServerComms{
     this.success = 0
 
     this.audioPlayer = audioPlayer
-    console.log(audioPlayer)
     this.socket = new WebSocket('ws://localhost:8080')
     this.socket.onmessage = (event) => {this.incomingMessage(event)}
     this.socket.onopen = (transmission) => {
@@ -98,7 +97,7 @@ export class ServerComms{
 
   incomingMessage(event){
     try{
-      const transmission = JSON.parse(event.data)
+      let transmission = JSON.parse(event.data)
       switch(transmission.type){
         case 'handshake':
           this.hasHandshakes = true
@@ -118,6 +117,7 @@ export class ServerComms{
           this.audioPlayer.play('burst')
           console.log(transmission)
           if( this.messages.length < 8 ){
+            transmission.time=Date.now()
             this.messages.push(transmission)
             this.hasMessages = true
           }

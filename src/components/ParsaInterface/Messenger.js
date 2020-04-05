@@ -188,8 +188,70 @@ export const Messenger = (mix) => class extends mix{
     }
   }
 
-  readMessage(keyCodes){
+  readMessage(keyCodes, resetIndex){
+    if( !this.state.hasUpdated ){
+      this.state.hasUpdated = true
+      this.display.setMessage( this.messages[this.inboxselection].content )
+    }else{
+      if( keyCodes.length > 0 && this.bouncer.debounced ){
+        const lastKey = keyCodes[keyCodes.length-1]
+        const shifted = keyCodes[0] === 16 || keyCodes[0] === 60 ? true : false
+        if( shifted ){
+          switch( lastKey ){
+            case 87:
+              console.log('kopioi')
+              this.message = this.messages[this.inboxselection].content
+              this.state.view = 'message'
+              this.state.hasUpdated = false
+              this.bouncer.debounced = false
+              break
+            case 8:
+            case 221:
+              this.state.subprevious = this.state.subview
+              this.state.subview = 'delete'
+              this.state.hasUpdated = false
+              this.bouncer.debounced = false
+              break
+          }
 
+        }else{
+          switch(lastKey){
+            case 35:
+            case 222:
+              this.bouncer.debounced = false
+              this.state.subview = ''
+              this.state.hasUpdated = false
+              if( resetIndex ) this.inboxselection = -1
+          }
+        }
+      }
+    }
+  }
+
+  deleteMessage(keyCodes){
+    if( !this.state.hasUpdated ){
+      this.state.hasUpdated = true
+      this.display.setMessage(`Viesti ${this.inboxselection+1}   Pois?`)
+    }else if( this.bouncer.debounced ){
+      this.bouncer.debounced = false
+      const lastKey = keyCodes[keyCodes.length - 1]
+      switch( lastKey ){
+        case 13:
+        case 192:
+          this.messages = this.messages.filter( (s,i) => { return i !== this.inboxselection } )
+          this.inboxselection = -1
+          this.state.subview = ''
+          this.state.subprevious = ''
+          this.state.hasUpdated = false
+          break
+        case 35:
+        case 222:
+          this.state.subview = this.state.subprevious
+          this.state.subprevious = ''
+          this.state.hasUpdated = false
+          break
+      }
+    }
   }
 
   changeInboxSelection(value){
@@ -203,59 +265,92 @@ export const Messenger = (mix) => class extends mix{
     }else this.inboxselection = -1
   }
 
-  inbox(keyCodes) {
-    if (this.state.subview === 'read') {
-      this.readMessage(keyCodes)
-    } else {
-      if (!this.state.hasUpdated) {
-        this.state.hasUpdated = true
-        if( this.inboxselection === -1 ){
-          switch (this.messages.length) {
-            case 0:
-              this.display.setMessage('Ei viestejä')
-              break
-            case 1:
-              this.display.setMessage('1 viesti')
-              break
-            default:
-              this.display.setMessage(`Valitse Vst= 1-${this.messages.length}`)
-          }
-        }else{
-          this.display.setMessage(`${this.inboxselection+1}=1343   Läh=AAA`)
-        }
-      }else if( keyCodes.length > 0 && this.bouncer.debounced ){
-        this.bouncer.debounced = false
-        const lastKey = keyCodes[keyCodes.length-1]
-        const shifted = keyCodes[0] === 16 || keyCodes[0] === 60 ? true : false
-        if( shifted ){
-          //jos selausmode päällä:
-          ////Hävitys
-          ////Kopiointi
+  inbox(keyCodes){
+    switch(this.state.subview){
+      case 'read':
+        this.readMessage(keyCodes,false)
+        break
+      case 'delete':
+        this.deleteMessage(keyCodes)
+        break
+      default:
+        this.inboxMenu(keyCodes)
+    }
+  }
 
-          //jos normimodessa:
-          ////Hävitys, poistaa kaikki
-          ////Numeroilla pääsee viesteihin
-        }else{
-          switch(lastKey){
-            case 13:
-            case 192:
-              if( this.inboxselection !== -1 ){
-                //avaa viesti
-              }
+  inboxMenu(keyCodes) {
+    if (!this.state.hasUpdated) {
+      this.state.hasUpdated = true
+      if (this.inboxselection === -1) {
+        switch (this.messages.length) {
+          case 0:
+            this.display.setMessage('Ei viestejä')
+            break
+          case 1:
+            this.display.setMessage('Valitse Vst= 1')
+            break
+          default:
+            this.display.setMessage(`Valitse Vst= 1-${this.messages.length}`)
+        }
+      } else {
+        const pad = (input) => { return input < 10 ? `0${input}` : input }
+        const msgDate = new Date(this.messages[this.inboxselection].time+this.time)
+        const msgTime = `${pad(msgDate.getHours())}${pad(msgDate.getMinutes())}`
+        this.display.setMessage(`${this.inboxselection + 1}=${msgTime}   Läh=${this.messages[this.inboxselection].sender}`)
+      }
+    } else if (keyCodes.length > 0 && this.bouncer.debounced) {
+      this.bouncer.debounced = false
+      const lastKey = keyCodes[keyCodes.length - 1]
+      const shifted = keyCodes[0] === 16 || keyCodes[0] === 60 ? true : false
+      if (shifted) {
+        if (this.inboxselection === -1) {
+          const shiftedKey = this.topRowToNumeric(lastKey) - 49
+          if (shiftedKey >= 0 && shiftedKey < this.messages.length) {
+            this.inboxselection = shiftedKey
+            this.state.hasUpdated = false
+          }
+        } else {
+          switch (lastKey) {
+            case 8:
+            case 221:
+              this.state.subprevious = this.state.subview
+              this.state.subview = 'delete'
+              this.state.hasUpdated = false
               break
-            case 37:
-            case 188:
-              this.changeInboxSelection(-1)
-              break
-            case 39:
-            case 173:
-              this.changeInboxSelection(1)
-              break
-            case 35:
-            case 222:
-              this.backToMainmenu()
+            case 87:
+              this.message = this.messages[this.inboxselection].content
+              this.state.view = 'message'
+              this.state.hasUpdated = false
               break
           }
+        }
+      } else {
+        switch (lastKey) {
+          case 13:
+          case 192:
+            if (this.inboxselection !== -1) {
+              this.state.subview = 'read'
+              this.state.hasUpdated = false
+            }
+            break
+          case 37:
+          case 188:
+            this.changeInboxSelection(-1)
+            break
+          case 39:
+          case 173:
+            this.changeInboxSelection(1)
+            break
+          case 35:
+          case 222:
+            if (this.inboxselection === -1) {
+              this.backToMainmenu()
+            } else {
+              this.inboxselection = -1
+              this.state.hasUpdated = false
+            }
+
+            break
         }
       }
     }

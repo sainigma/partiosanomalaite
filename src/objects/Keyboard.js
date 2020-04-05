@@ -16,7 +16,6 @@ export class Keyboard {
         const key = item.name
         this.keyEnum[key] = index
       })
-      console.log( this.keyEnum )
       owner.add(this.keyboard)
     })
   }
