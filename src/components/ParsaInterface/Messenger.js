@@ -38,7 +38,7 @@ export const Messenger = (mix) => class extends mix{
     if( !this.state.hasUpdated ){
       if( this.transmissionStart === 0 ){
         if( this.audioPlayer.paused('burst') ){
-          this.serverComms.sendMessage(this.destination, this.message, this.checksums.key1 )
+          this.serverComms.sendMessage(this.destination, this.message, this.checksums, this.keys )
           this.display.setMessage('Lähetetään')
           this.transmissionStart = epoch
         }

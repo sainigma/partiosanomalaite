@@ -1,3 +1,5 @@
+import { encryptMessage, decryptMessage } from './../utils/aesWrapper'
+
 export class ServerComms{
   constructor(audioPlayer){
     this.messages = []
@@ -7,7 +9,7 @@ export class ServerComms{
       callsign: '',
       group: '',
       subgroup: '',
-      checksum1: '',
+      checksum1: 'ZJRZ',
       checksum2: '',
     }
     this.success = 0
@@ -23,15 +25,27 @@ export class ServerComms{
     }
     this.hasHandshakes = false
     this.hasMessages = false
+    this.keys = {
+      key1:'AAAAAAAABBBBBBBBCCCCCCCCDDDDDDDD',
+      key2:''
+    }
 
     
   }
 
-  sendMessage(destination, content, checksum){
+  sendMessage(destination, message, checksums, keys){
+    const key = keys.key1.length === 32 ? keys.key1 : keys.key2
+    const checksum = checksums.key1.length===4?checksums.key1:checksums.key2
+    const content = JSON.stringify({
+      checksum,
+      message
+    }) 
+
+    const encryptedContent = encryptMessage(content, key)
     let transmission = {
       type:'transmit',
       destination,
-      content,
+      content:encryptedContent,
       checksum
     }
     transmission = JSON.stringify(transmission)
@@ -61,11 +75,14 @@ export class ServerComms{
   }
 
   updateSettings(params){
+    this.keys = params.keys !== undefined ? params.keys : this.keys
     this.settings.callsign = params.callsign !== undefined ? params.callsign : this.settings.callsign
     this.settings.group = params.group !== undefined ? params.group : this.settings.group
     this.settings.subgroup = params.subgroup !== undefined ? params.subgroup : this.settings.subgroup
     this.settings.checksum1 = params.checksum1 !== undefined ? params.checksum1 : this.settings.checksum1
     this.settings.checksum2 = params.checksum2 !== undefined ? params.checksum2 : this.settings.checksum2
+    
+
     console.log(this.settings)
     if( this.settings.callsign !== '' && ( this.settings.checksum1 !== '' || this.settings.checksum2 !== '' ) ){
       this.sendSettings()
@@ -73,11 +90,12 @@ export class ServerComms{
   }
 
   send(type,message,target){
+
     let transmission = {
       type,
       message,
-      frequency:this.frequency,
-      callsign: this.callsign,
+      frequency:this.settings.frequency,
+      callsign: this.settings.callsign,
       target: target !== undefined ? target : 0
     }
     transmission = JSON.stringify(transmission)
@@ -118,8 +136,13 @@ export class ServerComms{
           console.log(transmission)
           if( this.messages.length < 8 ){
             transmission.time=Date.now()
-            this.messages.push(transmission)
-            this.hasMessages = true
+            console.log(transmission)
+            const decryptedContent = decryptMessage(transmission.content,this.keys.key1)
+            if( decryptedContent !== undefined ){
+              transmission.content = decryptedContent
+              this.messages.push(transmission)
+              this.hasMessages = true
+            }
           }
           break
       }

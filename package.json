@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/sainigma/partiosanomalaite#readme",
   "dependencies": {
+    "aes-js": "^3.1.2",
     "three": "^0.114.0"
   },
   "devDependencies": {

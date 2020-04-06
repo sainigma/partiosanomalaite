@@ -3,12 +3,12 @@ export const KeyConfig = (mix) => class extends mix{
   constructor(){
     super()
     this.keys = {
-      key1:'',
+      key1:'AAAAAAAABBBBBBBBCCCCCCCCDDDDDDDD',
       key2:'',
       firstActive:true
     }
     this.checksums = {
-      key1:'',
+      key1:'ZJRZ',
       key2:''
     }
   }
@@ -117,7 +117,8 @@ export const KeyConfig = (mix) => class extends mix{
               }
               this.serverComms.updateSettings({
                 checksum1:this.checksums.key1,
-                checksum2:this.checksums.key2
+                checksum2:this.checksums.key2,
+                keys:this.keys
               })
               this.state.subview = ''
               this.state.hasUpdated = false
