@@ -11,14 +11,17 @@ class ClassAggregator extends Messenger(GeneralConfig(KeyConfig(TimeConfig(Objec
 
 export class ParsaInterface extends ClassAggregator{
 
-  constructor(display, parsaGroup, serverComms, audioPlayer){
+  constructor(display, keyboard, parsa, parsaGroup, serverComms, audioPlayer ,intersecter, mouseListener){
     super()
     this.version = 'V 20200402A'
+    this.parsa = parsa
     this.parsaGroup = parsaGroup
+    this.keyboard = keyboard
+    this.mouseListener = mouseListener
     let date = new Date()
 
     this.skipIntro = true
-
+    this.active = false
     this.state = {
       view:'off',
       subview:'',
@@ -31,16 +34,17 @@ export class ParsaInterface extends ClassAggregator{
       debounced: true,
       isWaiting: false,
       waitDuration: 0,
-      waitStart: 0
+      waitStart: 0,
+      mouseDebounced: true
     }
     this.info = {
       year:date.getFullYear()
     }
+    this.shiftToggled = false
     this.display = display
     this.serverComms = serverComms
     this.audioPlayer = audioPlayer
-    this.serverComms.send('handshake','yk')
-
+    this.intersecter = intersecter
     this.messages = [
       {
         time:1586100737382,
@@ -54,6 +58,7 @@ export class ParsaInterface extends ClassAggregator{
       },
     ]
     this.newMessages = false
+    this.parsaIndexInParsaGroup = -1
   }
 
   offState(keyCodes,epoch){
@@ -80,8 +85,6 @@ export class ParsaInterface extends ClassAggregator{
     }
 
     if( this.bouncer.waitStart === 0 ){
-      const ogRot = this.parsaGroup.rotation
-      this.parsaGroup.rotation.set(120,ogRot.y,ogRot.z)
       this.bouncer.waitStart = epoch
       this.display.setMessage( '................' )
       console.log("intro alkoi")
@@ -199,6 +202,12 @@ export class ParsaInterface extends ClassAggregator{
           }
           this.state.view = 'message'
           break
+        case 85:
+          if( this.newMessages ){
+            this.state.view = 'inbox'
+            this.inboxselection = this.messages.length - 1
+          }
+          break
         case 82:
           this.state.view = 'config'
           break
@@ -225,7 +234,8 @@ export class ParsaInterface extends ClassAggregator{
     }
   }
   
-  update(keyCodes, epoch){
+  updateWhenActive(keyCodes,epoch){
+    this.keyboard.moveKeys( keyCodes )
     if( keyCodes.length > 0 || !this.state.hasUpdated ){
       const keysLength = keyCodes.length
       const lastKey = keyCodes[keysLength-1]
@@ -272,6 +282,88 @@ export class ParsaInterface extends ClassAggregator{
       this.bouncer.debounced = true
       this.state.previousKey = 0
       this.state.previousKeysLength = 0
+    }
+  }
+  getActive(){
+    return this.active
+  }
+  toggleActive(){
+    this.active = !this.active
+    if( this.active ){
+      const ogRot = this.parsaGroup.rotation
+      this.parsaGroup.rotation.set(120,ogRot.y,ogRot.z)
+    }else{
+      this.parsaGroup.rotation.set(0,0,0)
+    }
+  }
+  keyCodesWithMouseActions(keyCodes){
+    const firstHover = this.intersecter.getFirstHover()
+    if( this.mouseListener.mouse === 1 && firstHover ){
+      let keyCode = firstHover.object.name
+      switch( keyCode ){
+        case 'left':
+          keyCode = 37
+          break
+        case 'right':
+          keyCode = 39
+          break
+        case 'dot':
+          keyCode = 40
+          break
+        case 'shift':
+          if( this.bouncer.mouseDebounced ){
+            this.shiftToggled = !this.shiftToggled
+            this.bouncer.mouseDebounced = false
+          }
+          break
+        case 'enter':
+          keyCode = 13
+          break
+        case 'backspace':
+          keyCode = 8
+          break
+        case 'end':
+          keyCode = 35
+          break
+        default:
+          keyCode = parseInt(keyCode)
+      }
+      if( keyCode !== NaN ){
+        if( keyCodes.length > 0 && keyCodes[0] === 16 || keyCodes[0] === 60 ){
+          return [ 16, keyCode ]
+        }
+        if( this.shiftToggled ) return [ 16, keyCode, ...keyCodes ]
+        return [ keyCode, ...keyCodes ]
+      }
+    }else{
+      this.bouncer.mouseDebounced = true
+    }
+    if( this.shiftToggled ) return [16, ...keyCodes]
+    return keyCodes
+  }
+
+
+  update(keyCodes, epoch){
+    if( this.active ){
+      this.updateWhenActive( this.keyCodesWithMouseActions(keyCodes) ,epoch)
+    }else{
+      const firstHover = this.intersecter.getFirstHover()
+      if( firstHover ){
+        switch( firstHover.object.parent.name ){
+          case 'partiosanomalaite_export':
+          case 'partiosanomalaite_outlines':
+          case 'nappaimisto':
+            if( this.mouseListener.mouse === 1 ){
+              this.toggleActive()
+              this.parsa.setOutline(false)
+            }else{
+              this.parsa.setOutline(true)
+            }
+            break
+        }
+      }else{
+        this.parsa.setOutline(false)
+      }
     }
   }
 }

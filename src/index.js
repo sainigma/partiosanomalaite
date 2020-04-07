@@ -8,12 +8,14 @@ import { MouseListener } from './components/MouseListener'
 import { ParsaInterface } from './components/ParsaInterface'
 import { ServerComms } from './components/ServerComms'
 import { AudioPlayer } from './components/AudioPlayer'
+import { Intersecter } from './components/Intersecter'
 import './styles.css'
 
 let camera,scene,renderer
 let parsaGroup,cameraPivot
 let segmentDisplay,parsa,enviroSphere,keyboard
 let keyListener, mouseListener, parsaInterface, serverComms, audioPlayer
+let intersecter
 
 const init = () => {
   let container
@@ -41,7 +43,7 @@ const init = () => {
   parsa = new Parsa(parsaGroup)
   const segmentInitialPosition = new THREE.Vector3(-0.38,0.42,-0.3)
   segmentDisplay = new SegmentDisplay(16,parsaGroup,segmentInitialPosition)
-  keyboard = new Keyboard(parsaGroup)
+  
   scene.add(parsaGroup)
   cameraPivot.add(camera)
   parsaGroup.rotation.set(0,0,0)
@@ -49,9 +51,20 @@ const init = () => {
   scene.rotateOnWorldAxis(new THREE.Vector3(0,1,0),-3.141*0.7)
   audioPlayer = new AudioPlayer()
   keyListener = new KeyListener(audioPlayer)
-  mouseListener = new MouseListener()
   serverComms = new ServerComms(audioPlayer)
-  parsaInterface = new ParsaInterface(segmentDisplay, parsaGroup, serverComms, audioPlayer)
+  intersecter = new Intersecter(window, camera, parsaGroup)
+  mouseListener = new MouseListener(intersecter)
+  keyboard = new Keyboard(parsaGroup,audioPlayer)
+  parsaInterface = new ParsaInterface(
+    segmentDisplay,
+    keyboard,
+    parsa,
+    parsaGroup,
+    serverComms,
+    audioPlayer,
+    intersecter,
+    mouseListener
+  )
 }
 
 const animate = () => {
@@ -60,20 +73,16 @@ const animate = () => {
 }
 
 let lastRefreshed = Date.now()/1E3
+let lastActive = ''
 
 const update = () => {
   const epoch = Date.now()/1E3
   const keysDown = keyListener.getKeysDown()
   const mouse = mouseListener.getDeltas()
   const zoom = 1-mouse.y/1080
-  keyboard.moveKeys( keysDown )
   if( mouseListener.mouse >= 4 ){
     cameraPivot.rotateOnWorldAxis( new THREE.Vector3(0,1,0), mouse.x/1e4 )
-    cameraPivot.rotateOnWorldAxis( new THREE.Vector3(1,0,0), mouse.y/1e4 )
-
-    console.log( cameraPivot.rotation )
-    //cameraPivot.rotation.set(0,3*(mouse.x/1920),0)
-    //cameraPivot.scale.set(zoom, zoom, zoom)
+    //cameraPivot.rotateOnWorldAxis( new THREE.Vector3(1,0,0), mouse.y/1e4 )
   }
   
   if( epoch - lastRefreshed > 0.001 ){

@@ -192,6 +192,9 @@ export const Messenger = (mix) => class extends mix{
     if( !this.state.hasUpdated ){
       this.state.hasUpdated = true
       this.display.setMessage( this.messages[this.inboxselection].content )
+      if( this.inboxselection === this.messages.length -1 ){
+        this.newMessages = false
+      }
     }else{
       if( keyCodes.length > 0 && this.bouncer.debounced ){
         const lastKey = keyCodes[keyCodes.length-1]

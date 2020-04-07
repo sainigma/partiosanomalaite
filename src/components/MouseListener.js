@@ -1,8 +1,9 @@
 export class MouseListener {
-  constructor(){
+  constructor(intersecter){
     const mouseMove = (event) => {
       const clientX = event.clientX
       const clientY = event.clientY
+      this.intersecter.intersect( event.clientX, event.clientY, false )
       if( this.initialMouseX === -1 ){
         this.initialMouseX = clientX
         this.initialMouseY = clientY
@@ -15,6 +16,8 @@ export class MouseListener {
       if( this.mouse === 0 ){
         this.initialMouseX = event.clientX
         this.initialMouseY = event.clientY
+      }else if( this.mouse === 1 ){
+        this.intersecter.intersect( event.clientX, event.clientY, true )
       }
       this.mouse = event.buttons
     }
@@ -24,6 +27,7 @@ export class MouseListener {
     this.deltaX = 0
     this.deltaY = 0
     this.mouse = 0
+    this.intersecter = intersecter
     document.addEventListener('mousemove', mouseMove, false)
     document.addEventListener('mousedown', mouseButtonToggle, false)
     document.addEventListener('mouseup', mouseButtonToggle, false)

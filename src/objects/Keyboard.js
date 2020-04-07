@@ -2,11 +2,12 @@ import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 
 export class Keyboard {
-  constructor(owner){
+  constructor(owner,audioPlayer){
     let loader = new GLTFLoader().setPath('models/')
 
     this.keyEnum = {}
     this.keysDown = []
+    this.audioPlayer = audioPlayer
     loader.load('nappaimisto.gltf', (gltf) => {
       this.keyboard = gltf.scene
       this.keyboard.scale.set(10,10,10)
@@ -65,9 +66,11 @@ export class Keyboard {
 
     if( actuate ){
       if( isPushed ){
+        this.audioPlayer.play('keyDown')
         key.scale.set(1,0.1,1)
         this.keysDown.push( index )
       }else{
+        this.audioPlayer.play('keyUp')
         key.scale.set(1,1,1)
         this.keysDown = this.keysDown.filter( key => key !== keyCode )
       }
