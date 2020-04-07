@@ -2,6 +2,7 @@ import { GeneralConfig } from "./ParsaInterface/GeneralConfig"
 import { KeyConfig } from "./ParsaInterface/KeyConfig"
 import { TimeConfig } from "./ParsaInterface/TimeConfig"
 import { Messenger } from "./ParsaInterface/Messenger"
+import { lerpAnimation } from './../utils/genericAnimator'
 
 class ClassAggregator extends Messenger(GeneralConfig(KeyConfig(TimeConfig(Object)))){
   constructor(){
@@ -60,6 +61,16 @@ export class ParsaInterface extends ClassAggregator{
     ]
     this.newMessages = false
     this.parsaIndexInParsaGroup = -1
+    this.animation = {
+      isAnimating:false,
+      defaultPosition:this.parsaGroup.position,
+      defaultRotation:this.parsaGroup.rotation,
+      positionOffset:[0,0,0],
+      rotationOffset:[0.5944,0,0],
+      direction:true,
+      startTime:-1,
+      duration:3
+    }
   }
 
   offState(keyCodes,epoch){
@@ -291,9 +302,8 @@ export class ParsaInterface extends ClassAggregator{
   toggleActive(){
     this.active = !this.active
     if( this.active ){
-      const ogRot = this.parsaGroup.rotation
-      this.parsaGroup.rotation.set(120,ogRot.y,ogRot.z)
-      this.dollyGrip.addTransition( this.dollyGrip.getCurrentPosition(), this.dollyGrip.getView('parsa'), 3 )
+      this.animation.isAnimating = true
+      this.dollyGrip.addTransition( this.dollyGrip.getPosition('parsa'), this.dollyGrip.getView('parsa'), 1 )
     }else{
       this.parsaGroup.rotation.set(0,0,0)
     }
@@ -344,9 +354,15 @@ export class ParsaInterface extends ClassAggregator{
     return keyCodes
   }
 
+  animate(epoch){
+    this.animation = lerpAnimation(epoch, this.animation, this.parsaGroup)
+  }
 
   update(keyCodes, epoch){
     if( this.active ){
+      if( this.animation.isAnimating ){
+        this.animate(epoch)
+      }
       this.updateWhenActive( this.keyCodesWithMouseActions(keyCodes) ,epoch)
     }else{
       const firstHover = this.intersecter.getFirstHover()

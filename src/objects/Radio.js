@@ -7,13 +7,14 @@ export class Radio {
     let loader = new GLTFLoader().setPath('models/')
     loader.load('radio.gltf', (gltf) => {
       let radio = gltf.scene
-      /*
+      
       radio.children.forEach( (child,index) => {
-        if( child.name === 'radio_outlines' ){
+        if( child.name === 'runkoOutline' ){
           this.outlineIndex = index
           child.visible = false
         }
-      })*/
+      })
+
       radio.scale.set(10,10,10)
       radio.name = 'radio'
       this.radio = radio

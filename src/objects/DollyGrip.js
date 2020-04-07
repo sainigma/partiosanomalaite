@@ -9,17 +9,18 @@ export class DollyGrip{
     this.animations = []
   }
   cameraSetNamedView(name){
-    const position = this.getPositions(name)
+    const position = this.getPosition(name)
     const lookTarget = this.getView(name)
     this.camera.position.set( position.x, position.y, position.z )
     this.camera.lookAt( lookTarget )
     this.camera.currentTarget = this.getView(name)
   }
-  getPositions(name){
+  getPosition(name){
     switch(name){
       case 'parsa':
+        return new THREE.Vector3(0.5,-1,0)
       default:
-        return new THREE.Vector3(0, 1.5, 1.5)
+        return new THREE.Vector3(-0.5, 2.5, 1.5)
     }
   }
   getView(name){
@@ -60,18 +61,20 @@ export class DollyGrip{
         this.animations[lastIndex].startTarget = this.camera.currentTarget
         this.animations[lastIndex].startTime = epoch
         console.log(this.animations[lastIndex])
-      }else if( epoch - this.animations[lastIndex].startTime >= this.animations[lastIndex].transitionTime ){
-        const finalState = this.animations.pop()
-        this.cameraPivot.position.set( finalState.endPosition.x, finalState.endPosition.y, finalState.endPosition.z )
-        this.camera.lookAt( finalState.endPosition )
-        this.camera.currentTarget = finalState.endPosition
       }else{
-        const lerpValue = (epoch - this.animations[lastIndex].startTime) / this.animations[lastIndex].transitionTime
+        let lerpValue = (epoch - this.animations[lastIndex].startTime) / this.animations[lastIndex].transitionTime
+        if( lerpValue > 1 ){
+          lerpValue = 1
+        }
         const currentAnimation = this.animations[lastIndex]
         const currentPosition = currentAnimation.startPosition.lerp( currentAnimation.endPosition, lerpValue )
         const currentTarget = currentAnimation.startTarget.lerp( currentAnimation.endTarget, lerpValue )
         this.cameraPivot.position.set( currentPosition.x, currentPosition.y, currentPosition.z )
         this.camera.lookAt( currentTarget )
+        if( lerpValue === 1 ){
+          this.animations.pop()
+          console.log('pop')
+        }
       }
     }
   }
