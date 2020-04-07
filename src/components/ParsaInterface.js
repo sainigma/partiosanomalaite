@@ -11,11 +11,12 @@ class ClassAggregator extends Messenger(GeneralConfig(KeyConfig(TimeConfig(Objec
 
 export class ParsaInterface extends ClassAggregator{
 
-  constructor(display, keyboard, parsa, parsaGroup, serverComms, audioPlayer ,intersecter, mouseListener){
+  constructor(display, keyboard, parsa, parsaGroup, dollyGrip, serverComms, audioPlayer ,intersecter, mouseListener){
     super()
     this.version = 'V 20200402A'
     this.parsa = parsa
     this.parsaGroup = parsaGroup
+    this.dollyGrip = dollyGrip
     this.keyboard = keyboard
     this.mouseListener = mouseListener
     let date = new Date()
@@ -292,6 +293,7 @@ export class ParsaInterface extends ClassAggregator{
     if( this.active ){
       const ogRot = this.parsaGroup.rotation
       this.parsaGroup.rotation.set(120,ogRot.y,ogRot.z)
+      this.dollyGrip.addTransition( this.dollyGrip.getCurrentPosition(), this.dollyGrip.getView('parsa'), 3 )
     }else{
       this.parsaGroup.rotation.set(0,0,0)
     }
@@ -359,8 +361,10 @@ export class ParsaInterface extends ClassAggregator{
             }else{
               this.parsa.setOutline(true)
             }
+
             break
         }
+
       }else{
         this.parsa.setOutline(false)
       }

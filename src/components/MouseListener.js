@@ -29,8 +29,8 @@ export class MouseListener {
     this.mouse = 0
     this.intersecter = intersecter
     document.addEventListener('mousemove', mouseMove, false)
-    document.addEventListener('mousedown', mouseButtonToggle, false)
-    document.addEventListener('mouseup', mouseButtonToggle, false)
+    document.addEventListener('pointerdown', mouseButtonToggle, false)
+    document.addEventListener('pointerup', mouseButtonToggle, false)
   }
   getDeltas(){
     return {x:this.deltaX, y:this.deltaY}
