@@ -1,6 +1,7 @@
 import * as THREE from 'three'
 export class Intersecter{
-  constructor(window, camera, objects){
+  constructor(window, camera){
+    this.objectGroups = []
     this.hovered = []
     this.window = {
       innerWidth:window.innerWidth,
@@ -8,20 +9,27 @@ export class Intersecter{
     }
     this.raycaster = new THREE.Raycaster()
     this.camera = camera
-    this.activeObjects = objects
   }
   intersect( clientX, clientY ){
-    const userClickedAt = new THREE.Vector2(
-      ( clientX / window.innerWidth ) * 2 - 1,
-      -( clientY / window.innerHeight ) * 2 + 1
-    )
-    this.raycaster.setFromCamera( userClickedAt, this.camera )
-
-    const intersects = this.raycaster.intersectObjects( this.activeObjects.children, true )
-    this.hovered = intersects
+    if( this.objectGroups.length > 0 && this.objectGroups[0] !== undefined ){
+      const userClickedAt = new THREE.Vector2(
+        ( clientX / window.innerWidth ) * 2 - 1,
+        -( clientY / window.innerHeight ) * 2 + 1
+      )
+      this.raycaster.setFromCamera( userClickedAt, this.camera )
+      
+      let intersects = []
+      this.objectGroups.forEach( objectGroup => {
+        const currentIntersects = this.raycaster.intersectObjects( objectGroup.children, true )
+        if( currentIntersects.length > 0 ){
+          intersects = [...intersects, ...currentIntersects]
+        }
+      })
+      this.hovered = intersects
+    }
   }
-  setActiveGroup(objectGroup){
-    this.activeObjects = objectGroup
+  addGroup(objectGroup){
+    this.objectGroups.push(objectGroup)
   }
   getFirstHover(){
     if( this.hovered.length > 0 ) return this.hovered[0]

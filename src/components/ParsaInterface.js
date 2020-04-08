@@ -12,18 +12,31 @@ class ClassAggregator extends Messenger(GeneralConfig(KeyConfig(TimeConfig(Objec
 
 export class ParsaInterface extends ClassAggregator{
 
-  constructor(display, keyboard, parsa, parsaGroup, dollyGrip, serverComms, audioPlayer ,intersecter, mouseListener){
+  constructor(display, keyboard, parsa, parsaGroup, dollyGrip, serverComms, audioPlayer ,intersecter, mouseListener, setActiveInterface){
     super()
+
+    let date = new Date()
     this.version = 'V 20200402A'
+    this.name = 'parsa'
+    this.info = {
+      year:date.getFullYear()
+    }
+    this.skipIntro = true
+    this.display = display
+    this.shiftToggled = false
+    this.dollyTransitionTime = 0.34
+
     this.parsa = parsa
     this.parsaGroup = parsaGroup
     this.dollyGrip = dollyGrip
     this.keyboard = keyboard
     this.mouseListener = mouseListener
-    let date = new Date()
-
-    this.skipIntro = true
+    this.serverComms = serverComms
+    this.audioPlayer = audioPlayer
+    this.intersecter = intersecter
+    this.setActiveInterface = setActiveInterface
     this.active = false
+
     this.state = {
       view:'off',
       subview:'',
@@ -39,14 +52,8 @@ export class ParsaInterface extends ClassAggregator{
       waitStart: 0,
       mouseDebounced: true
     }
-    this.info = {
-      year:date.getFullYear()
-    }
-    this.shiftToggled = false
-    this.display = display
-    this.serverComms = serverComms
-    this.audioPlayer = audioPlayer
-    this.intersecter = intersecter
+
+
     this.messages = [
       {
         time:1586100737382,
@@ -64,12 +71,16 @@ export class ParsaInterface extends ClassAggregator{
     this.animation = {
       isAnimating:false,
       defaultPosition:this.parsaGroup.position,
-      defaultRotation:this.parsaGroup.rotation,
+      defaultRotation:[
+        this.parsaGroup.rotation.x,
+        this.parsaGroup.rotation.y,
+        this.parsaGroup.rotation.z
+      ],
       positionOffset:[0,0,0],
       rotationOffset:[0.5944,0,0],
       direction:true,
       startTime:-1,
-      duration:3
+      duration:0.3
     }
   }
 
@@ -296,16 +307,63 @@ export class ParsaInterface extends ClassAggregator{
       this.state.previousKeysLength = 0
     }
   }
+
+  getName(){
+    return this.name
+  }
   getActive(){
     return this.active
   }
+
+  resetAnimation(){
+    this.animation.isAnimating = false
+    this.animation.startTime = -1
+  }
+
+  getCameraPosition(){
+    let newTarget = {
+      x:this.parsaGroup.position.x,
+      y:-1,
+      z:this.parsaGroup.position.z
+    }
+    return newTarget
+  }
+
+  getLookAtTarget(){
+    let newTarget = {
+      x:0,
+      y:0,
+      z:0
+    }
+    return newTarget
+  }
+
+  activate(){
+    this.resetAnimation()
+    this.animation.direction = true
+    this.animation.isAnimating = true
+
+    this.active = true
+    this.state.hasUpdated = false
+    this.setActiveInterface(this.name)
+    this.dollyGrip.addTransition( this.getCameraPosition(), this.getLookAtTarget(), this.dollyTransitionTime )
+  }
+
+  deactivate(){
+    if( this.active ){
+      this.active = false
+      this.resetAnimation()
+      this.animation.direction = false
+      this.animation.isAnimating = true
+    }
+  }
+
   toggleActive(){
     this.active = !this.active
     if( this.active ){
-      this.animation.isAnimating = true
-      this.dollyGrip.addTransition( this.dollyGrip.getPosition('parsa'), this.dollyGrip.getView('parsa'), 1 )
+      this.activate()
     }else{
-      this.parsaGroup.rotation.set(0,0,0)
+      this.deactivate()
     }
   }
   keyCodesWithMouseActions(keyCodes){
@@ -359,10 +417,10 @@ export class ParsaInterface extends ClassAggregator{
   }
 
   update(keyCodes, epoch){
+    if( this.animation.isAnimating ){
+      this.animate(epoch)
+    }
     if( this.active ){
-      if( this.animation.isAnimating ){
-        this.animate(epoch)
-      }
       this.updateWhenActive( this.keyCodesWithMouseActions(keyCodes) ,epoch)
     }else{
       const firstHover = this.intersecter.getFirstHover()
@@ -377,10 +435,8 @@ export class ParsaInterface extends ClassAggregator{
             }else{
               this.parsa.setOutline(true)
             }
-
             break
         }
-
       }else{
         this.parsa.setOutline(false)
       }

@@ -16,9 +16,11 @@ export const lerpAnimation = (epoch, animation, target) => {
   if( newAnimation.startTime === -1 ){
     newAnimation.startTime = epoch
   }
+  let startPosition = newAnimation.defaultPosition
+  let startRotation = new THREE.Vector3(newAnimation.defaultRotation.x,newAnimation.defaultRotation.y,newAnimation.defaultRotation.z)
 
   if( newAnimation.alternativeRotation === undefined ){
-    let alternativeRotation = newAnimation.defaultRotation.clone()
+    let alternativeRotation = new THREE.Vector3(startRotation.x,startRotation.y,startRotation.z)
     alternativeRotation.x += newAnimation.rotationOffset[0]
     alternativeRotation.y += newAnimation.rotationOffset[1]
     alternativeRotation.z += newAnimation.rotationOffset[2]
@@ -31,26 +33,30 @@ export const lerpAnimation = (epoch, animation, target) => {
     alternativePosition.z += newAnimation.positionOffset[2]
     newAnimation.alternativePosition = alternativePosition
   }
-
   let lerpValue = (epoch - newAnimation.startTime)/newAnimation.duration
+
   if( lerpValue > 1 ){
     lerpValue = 1
   }
+  
+  let endPosition = newAnimation.alternativePosition.clone()
+  let endRotation = newAnimation.alternativeRotation.clone()
 
-  let startPosition = newAnimation.direction ? newAnimation.defaultPosition : newAnimation.alternativePosition
-  let endPosition = newAnimation.direction ? newAnimation.alternativePosition : newAnimation.defaultPosition
-  let startRotation = newAnimation.direction ? newAnimation.defaultRotation.toVector3() : newAnimation.alternativeRotation.toVector3()
-  let endRotation = newAnimation.direction ? newAnimation.alternativeRotation.toVector3() : newAnimation.defaultRotation.toVector3()
+  let currentPosition, currentRotation
+  if( newAnimation.direction ){
+    currentPosition = startPosition.lerp(endPosition,lerpValue)
+    currentRotation = startRotation.lerp(endRotation,lerpValue)
+  }else{
+    currentPosition = endPosition.lerp(startPosition,lerpValue)
+    currentRotation = endRotation.lerp(startRotation,lerpValue)
+  }
 
-  const currentPosition = startPosition.lerp(endPosition,lerpValue)
-  const currentRotation = startRotation.lerp(endRotation,lerpValue)
+  
   target.position.set( currentPosition.x, currentPosition.y, currentPosition.z )
   target.rotation.set( currentRotation.x, currentRotation.y, currentRotation.z )
 
-  if( lerpValue === 1 ){
-    console.log("end")
+  if( lerpValue === 1 && newAnimation.direction ){
     newAnimation.isAnimating = false
-    newAnimation.direction = !newAnimation.direction
     newAnimation.startTime = -1
   }
 

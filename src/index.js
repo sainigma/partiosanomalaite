@@ -10,6 +10,7 @@ import { DollyGrip } from './objects/DollyGrip'
 import { KeyListener } from './components/KeyListener'
 import { MouseListener } from './components/MouseListener'
 import { ParsaInterface } from './components/ParsaInterface'
+import { RadioInterface } from './components/RadioInterface'
 import { ServerComms } from './components/ServerComms'
 import { AudioPlayer } from './components/AudioPlayer'
 import { Intersecter } from './components/Intersecter'
@@ -18,14 +19,23 @@ import './styles.css'
 let camera,scene,renderer
 let parsaGroup,radioGroup,dollyGrip
 let segmentDisplay,parsa,enviroSphere,keyboard,radio
-let keyListener, mouseListener, parsaInterface, serverComms, audioPlayer
+let parsaInterface, radioInterface, interfaces = []
+let keyListener, mouseListener, serverComms, audioPlayer
 let intersecter
+
+const setActiveInterface = (name) => {
+  interfaces.forEach( objectInterface => {
+    if( objectInterface.getName() !== name ){
+      objectInterface.deactivate()
+    }
+  })
+}
 
 const init = () => {
   let container
   container = document.getElementById('root')
 
-  camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.05, 50)
+  camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.05, 50)
 
   scene = new THREE.Scene()
   renderer = new THREE.WebGLRenderer( {alpha: false, antialias: true} )
@@ -50,14 +60,16 @@ const init = () => {
   scene.add(parsaGroup)
   scene.add(radioGroup)
   scene.add(dollyGrip.getCameraPivot())
-  radioGroup.position.set(2,0,-3)
-  radioGroup.rotateOnWorldAxis( new THREE.Vector3(0,1,0), -3.141*0.15 )
+  radioGroup.position.set(2,0,-2.5)
+  radioGroup.rotateOnWorldAxis( new THREE.Vector3(0,1,0), -3.141*0.19 )
   scene.rotateOnWorldAxis(new THREE.Vector3(0,1,0),-3.141*0.7)
 
   audioPlayer = new AudioPlayer()
   keyListener = new KeyListener(audioPlayer)
   serverComms = new ServerComms(audioPlayer)
-  intersecter = new Intersecter(window, camera, parsaGroup)
+  intersecter = new Intersecter(window, camera)
+  intersecter.addGroup(parsaGroup)
+  intersecter.addGroup(radioGroup)
   mouseListener = new MouseListener(intersecter)
   keyboard = new Keyboard(parsaGroup,audioPlayer)
   parsaInterface = new ParsaInterface(
@@ -69,8 +81,21 @@ const init = () => {
     serverComms,
     audioPlayer,
     intersecter,
-    mouseListener
+    mouseListener,
+    setActiveInterface
   )
+  radioInterface = new RadioInterface(
+    radio, 
+    radioGroup, 
+    serverComms, 
+    audioPlayer, 
+    intersecter, 
+    mouseListener, 
+    dollyGrip,
+    setActiveInterface
+  )
+  interfaces.push(parsaInterface)
+  interfaces.push(radioInterface)
 }
 
 const animate = () => {
@@ -92,7 +117,8 @@ const update = () => {
   dollyGrip.update(epoch)
 
   if( epoch - lastRefreshed > 0.001 ){
-    parsaInterface.update( keysDown, epoch, serverComms )
+    parsaInterface.update( keysDown, epoch )
+    radioInterface.update( keysDown, epoch )
     lastRefreshed = epoch
     segmentDisplay.update(epoch)
   }

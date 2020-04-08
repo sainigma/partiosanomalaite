@@ -18,7 +18,6 @@ export class Radio {
       radio.scale.set(10,10,10)
       radio.name = 'radio'
       this.radio = radio
-      console.log(radio)
       owner.add(radio)
     })
     
