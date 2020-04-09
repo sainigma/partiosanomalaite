@@ -15,10 +15,11 @@ import { ServerComms } from './components/ServerComms'
 import { AudioPlayer } from './components/AudioPlayer'
 import { Intersecter } from './components/Intersecter'
 import './styles.css'
+import { NoteBook } from './objects/NoteBook'
 
 let camera,scene,renderer
 let parsaGroup,radioGroup,dollyGrip
-let segmentDisplay,parsa,enviroSphere,keyboard,radio
+let segmentDisplay,parsa,enviroSphere,keyboard,radio,noteBook
 let parsaInterface, radioInterface, interfaces = []
 let keyListener, mouseListener, serverComms, audioPlayer
 let intersecter
@@ -54,6 +55,7 @@ const init = () => {
   dollyGrip = new DollyGrip(camera)
   parsa = new Parsa(parsaGroup)
   radio = new Radio(radioGroup)
+  noteBook = new NoteBook(scene)
   const segmentInitialPosition = new THREE.Vector3(-0.38,0.42,-0.3)
   segmentDisplay = new SegmentDisplay(16,parsaGroup,segmentInitialPosition)
   
@@ -104,7 +106,6 @@ const animate = () => {
 }
 
 let lastRefreshed = Date.now()/1E3
-
 const update = () => {
   const epoch = Date.now()/1E3
   const keysDown = keyListener.getKeysDown()
@@ -121,6 +122,9 @@ const update = () => {
     radioInterface.update( keysDown, epoch )
     lastRefreshed = epoch
     segmentDisplay.update(epoch)
+    if( keysDown[0] === 39 ) noteBook.changePage(true)
+    else if( keysDown[0] === 37 ) noteBook.changePage(false)
+    noteBook.animate(epoch)
   }
   
   renderer.render(scene,camera)
