@@ -436,6 +436,8 @@ export class ParsaInterface extends ClassAggregator{
               this.parsa.setOutline(true)
             }
             break
+          default:
+            this.parsa.setOutline(false)
         }
       }else{
         this.parsa.setOutline(false)

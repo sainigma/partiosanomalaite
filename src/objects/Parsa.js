@@ -5,7 +5,7 @@ export class Parsa {
   constructor(owner){
     this.outlineIndex
     let loader = new GLTFLoader().setPath('models/')
-    loader.load('parsaOutlines.gltf', (gltf) => {
+    loader.load('parsa.gltf', (gltf) => {
       let parsa = gltf.scene
       parsa.children.forEach( (child,index) => {
         if( child.name === 'partiosanomalaite_outlines' ){

@@ -1,12 +1,16 @@
 import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
+import { loadTexture } from './../utils/gltfUtils'
 
 export class NoteBook {
 
-  constructor(owner){
+  constructor(owner, mapBook, camera){
     this.outlineIndex
     this.noteBookIndex
     this.pageIndex
+
+    this.mapBook = mapBook
+    this.camera = camera
 
     this.selectedPage = 0
     this.pagesLength = 8
@@ -27,10 +31,13 @@ export class NoteBook {
     this.noteBookSurface
     this.pageSurface
 
-    this.baseTexture = this.loadTexture('vihko','png',path)
+    this.baseTexture = loadTexture('vihko','png',path)
     this.pages = this.loadPages('text_','png',path,this.pagesLength)
     console.log( this.pages )
     this.loadModel(owner)
+
+    this.initialPosition = new THREE.Vector3(0.02,0.12,-0.7)
+    this.intiialRotation = new THREE.Vector3(0,6.28*0.06,0.1)
   }
 
   loadPages(name, filetype, path, pagesLength){
@@ -41,21 +48,9 @@ export class NoteBook {
     let pages = []
     for(let i=0; i<pagesLength; i++){
       const trueName = `${name}${pad(i+1)}`
-      pages.push( this.loadTexture(trueName, filetype, path) )
+      pages.push( loadTexture(trueName, filetype, path) )
     }
     return pages
-  }
-
-  loadTexture(name, filetype, path){
-    console.log(name)
-    let loader = new THREE.TextureLoader().setPath(path)
-    return loader.load( (`${name}.${filetype}`), (texture) => {
-      texture.flipY = false
-      texture.encoding = 3001
-      texture.wrapS = 1000
-      texture.wrapT = 1000
-      return texture
-    })
   }
 
   loadModel(owner){
@@ -98,13 +93,18 @@ export class NoteBook {
       this.page = vihko.children[this.pageIndex]
       vihko.scale.set(10,10,10)
       vihko.name = 'vihko'
-      
-      vihko.position.set(-1,1.8,-1)
-      vihko.rotation.set(0.5,0,0)
+      const mapBookPosition = this.mapBook.getInitialPosition()
+      vihko.position.set(
+        mapBookPosition.x+this.initialPosition.x,
+        mapBookPosition.y+this.initialPosition.y,
+        mapBookPosition.z+this.initialPosition.z
+      )
+      vihko.rotation.set(this.intiialRotation.x,this.intiialRotation.y,this.intiialRotation.z)
       this.vihko = vihko
       owner.add(vihko)
     })
   }
+
   lerpPageRotation(value){
     if( this.vihko !== undefined ){
       const startRotation = new THREE.Vector2(-3.141*0.05,0)
@@ -113,17 +113,17 @@ export class NoteBook {
       this.vihko.children[this.pageIndex].rotation.x = currentRotation.x
     }
   }
-  getDisplayPosition(){
-    return new THREE.Vector3(0,0.3,0.45)
-  }
+
   setOutline(state){
     if( this.vihko !== undefined ){
       this.vihko.children[this.outlineIndex].visible = state
     }
   }
+
   getPage(){
     return this.selectedPage
   }
+
   changePage(direction){
     if( this.vihko !== undefined ){
       if( this.animation.isAnimating === false ){
@@ -134,7 +134,6 @@ export class NoteBook {
             this.animation.isAnimating = true
             this.pageSurface.map = this.pages[this.selectedPage]
             this.selectedPage++
-            //if( this.selectedPage >= this.pagesLength ) this.selectedPage = 0
             this.noteBookSurface.map = this.pages[this.selectedPage]
           }
         }else{
@@ -142,7 +141,6 @@ export class NoteBook {
             this.animation.isAnimating = true
             this.noteBookSurface.map = this.pages[this.selectedPage]
             this.selectedPage--
-            //if( this.selectedPage < 0 ) this.selectedPage = this.pagesLength -1
             this.pageSurface.map = this.pages[this.selectedPage]
           }
 

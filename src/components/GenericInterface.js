@@ -1,3 +1,5 @@
+import { lerpAnimation } from './../utils/genericAnimator'
+
 export class GenericInterface{
   constructor(model, modelGroup, serverComms, audioPlayer, intersecter, mouseListener, hoverObjectNames){
     this.model = model
@@ -22,9 +24,9 @@ export class GenericInterface{
       waitStart: 0,
       mouseDebounced: true
     }
-
     this.active = false
     this.hoverObjectNames = hoverObjectNames
+    console.log(this.model)
   }
 
   getName(){
@@ -41,7 +43,9 @@ export class GenericInterface{
   }
 
   animate(epoch){
-    this.animation = lerpAnimation(epoch, this.animation, this.modelGroup)
+    if( this.modelGroup !== undefined ){
+      this.animation = lerpAnimation(epoch, this.animation, this.modelGroup)
+    }
   }
 
   update(keyCodes, epoch){
@@ -60,6 +64,8 @@ export class GenericInterface{
           }else{
             this.model.setOutline(true)
           }
+        }else{
+          this.model.setOutline(false)
         }
       }else{
         this.model.setOutline(false)

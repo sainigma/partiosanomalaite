@@ -23,6 +23,7 @@ export class Intersecter{
         const currentIntersects = this.raycaster.intersectObjects( objectGroup.children, true )
         if( currentIntersects.length > 0 ){
           intersects = [...intersects, ...currentIntersects]
+          //console.log(intersects)
         }
       })
       this.hovered = intersects

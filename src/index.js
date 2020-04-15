@@ -6,21 +6,25 @@ import { Radio } from './objects/Radio'
 import { Keyboard } from './objects/Keyboard'
 import { EnviroSphere } from './objects/EnviroSphere'
 import { DollyGrip } from './objects/DollyGrip'
+import { NoteBook } from './objects/NoteBook'
+import { MapBook } from './objects/MapBook'
+
+import { ParsaInterface } from './components/ParsaInterface'
+import { RadioInterface } from './components/RadioInterface'
+import { MapBookInterface } from './components/MapBookInterface'
 
 import { KeyListener } from './components/KeyListener'
 import { MouseListener } from './components/MouseListener'
-import { ParsaInterface } from './components/ParsaInterface'
-import { RadioInterface } from './components/RadioInterface'
 import { ServerComms } from './components/ServerComms'
 import { AudioPlayer } from './components/AudioPlayer'
 import { Intersecter } from './components/Intersecter'
 import './styles.css'
-import { NoteBook } from './objects/NoteBook'
+
 
 let camera,scene,renderer
-let parsaGroup,radioGroup,dollyGrip
-let segmentDisplay,parsa,enviroSphere,keyboard,radio,noteBook
-let parsaInterface, radioInterface, interfaces = []
+let parsaGroup,radioGroup,notebookGroup,dollyGrip
+let segmentDisplay,parsa,enviroSphere,keyboard,radio,noteBook,mapBook
+let parsaInterface, radioInterface, mapBookInterface, interfaces = []
 let keyListener, mouseListener, serverComms, audioPlayer
 let intersecter
 
@@ -51,17 +55,21 @@ const init = () => {
   enviroSphere = new EnviroSphere(scene,renderer)
   parsaGroup = new THREE.Group()
   radioGroup = new THREE.Group()
+  notebookGroup = new THREE.Group()
 
   dollyGrip = new DollyGrip(camera)
   parsa = new Parsa(parsaGroup)
   radio = new Radio(radioGroup)
-  noteBook = new NoteBook(scene)
+  mapBook = new MapBook(notebookGroup)
+  noteBook = new NoteBook(notebookGroup, mapBook, camera)
   const segmentInitialPosition = new THREE.Vector3(-0.38,0.42,-0.3)
   segmentDisplay = new SegmentDisplay(16,parsaGroup,segmentInitialPosition)
   
   scene.add(parsaGroup)
   scene.add(radioGroup)
+  scene.add(notebookGroup)
   scene.add(dollyGrip.getCameraPivot())
+
   radioGroup.position.set(2,0,-2.5)
   radioGroup.rotateOnWorldAxis( new THREE.Vector3(0,1,0), -3.141*0.19 )
   scene.rotateOnWorldAxis(new THREE.Vector3(0,1,0),-3.141*0.7)
@@ -69,11 +77,15 @@ const init = () => {
   audioPlayer = new AudioPlayer()
   keyListener = new KeyListener(audioPlayer)
   serverComms = new ServerComms(audioPlayer)
+
   intersecter = new Intersecter(window, camera)
   intersecter.addGroup(parsaGroup)
   intersecter.addGroup(radioGroup)
+  intersecter.addGroup(notebookGroup)
+
   mouseListener = new MouseListener(intersecter)
   keyboard = new Keyboard(parsaGroup,audioPlayer)
+  
   parsaInterface = new ParsaInterface(
     segmentDisplay,
     keyboard,
@@ -96,8 +108,17 @@ const init = () => {
     dollyGrip,
     setActiveInterface
   )
+  mapBookInterface = new MapBookInterface(
+    mapBook,
+    intersecter,
+    mouseListener,
+    dollyGrip,
+    setActiveInterface
+  )
   interfaces.push(parsaInterface)
   interfaces.push(radioInterface)
+  interfaces.push(mapBookInterface)
+
 }
 
 const animate = () => {
@@ -120,6 +141,7 @@ const update = () => {
   if( epoch - lastRefreshed > 0.001 ){
     parsaInterface.update( keysDown, epoch )
     radioInterface.update( keysDown, epoch )
+    mapBookInterface.update( undefined, epoch )
     lastRefreshed = epoch
     segmentDisplay.update(epoch)
     if( keysDown[0] === 39 ) noteBook.changePage(true)
