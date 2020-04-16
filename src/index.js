@@ -121,12 +121,23 @@ const init = () => {
 
 }
 
+const loadingScreen = () => {
+  if( mapBookInterface.hasLoaded() ){
+    document.getElementById('debug').style.visibility='hidden'
+    requestAnimationFrame(animate)
+    update()
+  }else{
+    requestAnimationFrame(loadingScreen)
+  }
+}
+
 const animate = () => {
   requestAnimationFrame(animate)
   update()
 }
 
 let lastRefreshed = Date.now()/1E3
+
 const update = () => {
   const epoch = Date.now()/1E3
   const keysDown = keyListener.getKeysDown()
@@ -153,4 +164,5 @@ const update = () => {
 }
 
 init()
-animate()
+loadingScreen()
+//animate()

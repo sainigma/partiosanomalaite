@@ -51,4 +51,8 @@ export class MapBookInterface extends GenericInterface{
   updateWhenActive( keyCodes, epoch ){
 
   }
+
+  hasLoaded(){
+    return this.mapBook.loadingComplete
+  }
 }

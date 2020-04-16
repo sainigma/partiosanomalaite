@@ -1,7 +1,11 @@
 import * as THREE from 'three'
 
-export const loadTexture = (name, filetype, path) => {
-  let loader = new THREE.TextureLoader().setPath(path)
+export const loadTexture = (name, filetype, path, divToEdit) => {
+  const manager = new THREE.LoadingManager()
+  manager.onLoad = () => {
+    divToEdit.appendChild(document.createTextNode('.'))
+  }
+  let loader = new THREE.TextureLoader(manager).setPath(path)
   return loader.load( (`${name}.${filetype}`), (texture) => {
     texture.flipY = false
     texture.encoding = 3001

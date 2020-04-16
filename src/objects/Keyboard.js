@@ -3,11 +3,27 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 
 export class Keyboard {
   constructor(owner,audioPlayer){
-    let loader = new GLTFLoader().setPath('models/')
-
     this.keyEnum = {}
     this.keysDown = []
     this.audioPlayer = audioPlayer
+    this.loadModel(owner)
+  }
+
+  loadModel(owner){
+    const manager = new THREE.LoadingManager()
+    const keyboardDiv = document.createElement('div')
+    document.getElementById('debug').appendChild(keyboardDiv)
+
+    manager.onStart = () => {
+      keyboardDiv.appendChild(document.createTextNode('Loading keyboard..'))
+    }
+    manager.onProgress = () => {
+      keyboardDiv.appendChild(document.createTextNode('.'))
+    }
+    manager.onLoad = () => {
+      keyboardDiv.appendChild(document.createTextNode(' complete'))
+    }
+    let loader = new GLTFLoader(manager).setPath('models/')
     loader.load('nappaimisto.gltf', (gltf) => {
       this.keyboard = gltf.scene
       this.keyboard.scale.set(10,10,10)

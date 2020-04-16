@@ -4,7 +4,24 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 export class Parsa {
   constructor(owner){
     this.outlineIndex
-    let loader = new GLTFLoader().setPath('models/')
+    this.loadModel(owner)
+  }
+  loadModel(owner){
+    const manager = new THREE.LoadingManager()
+    const parsaDiv = document.createElement('div')
+    document.getElementById('debug').appendChild(parsaDiv)
+
+    manager.onStart = () => {
+      parsaDiv.appendChild(document.createTextNode('Loading parsa..'))
+    }
+    manager.onProgress = () => {
+      parsaDiv.appendChild(document.createTextNode('.'))
+    }
+    manager.onLoad = () => {
+      parsaDiv.appendChild(document.createTextNode(' complete'))
+    }
+
+    let loader = new GLTFLoader(manager).setPath('models/')
     loader.load('parsa.gltf', (gltf) => {
       let parsa = gltf.scene
       parsa.children.forEach( (child,index) => {
@@ -18,7 +35,6 @@ export class Parsa {
       this.parsa = parsa
       owner.add(parsa)
     })
-    
   }
   getDisplayPosition(){
     return new THREE.Vector3(0,0.3,0.45)

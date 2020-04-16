@@ -9,6 +9,19 @@ export class NoteBook {
     this.noteBookIndex
     this.pageIndex
 
+    this.manager = new THREE.LoadingManager()
+    this.notebookDiv = document.createElement('div')
+    document.getElementById('debug').appendChild(this.notebookDiv)
+    this.manager.onStart = () => {
+      this.notebookDiv.appendChild(document.createTextNode('Loading notebook..'))
+    }
+    this.manager.onProgress = () => {
+      this.notebookDiv.appendChild(document.createTextNode('.'))
+    }
+    this.manager.onLoad = () => {
+      this.notebookDiv.appendChild(document.createTextNode('complete'))
+    }
+
     this.mapBook = mapBook
     this.camera = camera
 
@@ -31,7 +44,7 @@ export class NoteBook {
     this.noteBookSurface
     this.pageSurface
 
-    this.baseTexture = loadTexture('vihko','png',path)
+    this.baseTexture = loadTexture('vihko','png',path,this.notebookDiv)
     this.pages = this.loadPages('text_','png',path,this.pagesLength)
     console.log( this.pages )
     this.loadModel(owner)
@@ -48,7 +61,7 @@ export class NoteBook {
     let pages = []
     for(let i=0; i<pagesLength; i++){
       const trueName = `${name}${pad(i+1)}`
-      pages.push( loadTexture(trueName, filetype, path) )
+      pages.push( loadTexture(trueName, filetype, path, this.notebookDiv) )
     }
     return pages
   }
@@ -63,7 +76,7 @@ export class NoteBook {
       return result
     }
 
-    let loader = new GLTFLoader().setPath('models/')
+    let loader = new GLTFLoader(this.manager).setPath('models/')
     loader.load('vihko.gltf', (gltf) => {
       let vihko = gltf.scene
 

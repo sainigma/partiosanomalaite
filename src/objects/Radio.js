@@ -4,7 +4,25 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 export class Radio {
   constructor(owner){
     this.outlineIndex
-    let loader = new GLTFLoader().setPath('models/')
+    this.loadModel(owner)
+  }
+
+  loadModel(owner){
+    const manager = new THREE.LoadingManager()
+    const radioDiv = document.createElement('div')
+    document.getElementById('debug').appendChild(radioDiv)
+
+    manager.onStart = () => {
+      radioDiv.appendChild(document.createTextNode('Loading radio..'))
+    }
+    manager.onProgress = () => {
+      radioDiv.appendChild(document.createTextNode('.'))
+    }
+    manager.onLoad = () => {
+      radioDiv.appendChild(document.createTextNode(' complete'))
+    }
+
+    let loader = new GLTFLoader(manager).setPath('models/')
     loader.load('radio.gltf', (gltf) => {
       let radio = gltf.scene
       
@@ -20,8 +38,8 @@ export class Radio {
       this.radio = radio
       owner.add(radio)
     })
-    
   }
+
   getDisplayPosition(){
     return new THREE.Vector3(0,0.3,0.45)
   }

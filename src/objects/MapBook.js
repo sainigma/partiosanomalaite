@@ -6,6 +6,8 @@ export class MapBook {
   constructor(owner){
     this.outlineIndex
     
+    this.loadingComplete = false
+
     this.animation = {
       isAnimating: false,
       startTime: -1,
@@ -29,7 +31,21 @@ export class MapBook {
   }
 
   loadModel(owner){
-    let loader = new GLTFLoader().setPath('models/')
+    const manager = new THREE.LoadingManager()
+    const mapBookDiv = document.createElement('div')
+    document.getElementById('debug').appendChild(mapBookDiv)
+    
+    manager.onStart = () => {
+      mapBookDiv.appendChild(document.createTextNode('Loading mapbook..'))
+    }
+    manager.onProgress = () => {
+      mapBookDiv.appendChild(document.createTextNode('.'))
+    }
+    manager.onLoad = () => {
+      mapBookDiv.appendChild(document.createTextNode(' complete'))
+      this.loadingComplete = true
+    }
+    let loader = new GLTFLoader(manager).setPath('models/')
     loader.load('karttatasku.gltf', (gltf) => {
       let karttatasku = gltf.scene
 
