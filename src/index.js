@@ -12,6 +12,7 @@ import { MapBook } from './objects/MapBook'
 import { ParsaInterface } from './components/ParsaInterface'
 import { RadioInterface } from './components/RadioInterface'
 import { MapBookInterface } from './components/MapBookInterface'
+import { NoteBookInterface } from './components/NoteBookInterface'
 
 import { KeyListener } from './components/KeyListener'
 import { MouseListener } from './components/MouseListener'
@@ -24,16 +25,24 @@ import './styles.css'
 let camera,scene,renderer
 let parsaGroup,radioGroup,notebookGroup,dollyGrip
 let segmentDisplay,parsa,enviroSphere,keyboard,radio,noteBook,mapBook
-let parsaInterface, radioInterface, mapBookInterface, interfaces = []
+let parsaInterface, radioInterface, mapBookInterface, noteBookInterface, interfaces = []
 let keyListener, mouseListener, serverComms, audioPlayer
 let intersecter
 
-const setActiveInterface = (name) => {
-  interfaces.forEach( objectInterface => {
-    if( objectInterface.getName() !== name ){
-      objectInterface.deactivate()
-    }
-  })
+const setActiveInterface = (name, forced) => {
+  if( name === undefined ){
+    interfaces.forEach( objectInterface => {
+      if( objectInterface.getName() === forced ){
+        objectInterface.deactivate(true)
+      }
+    })
+  }else{
+    interfaces.forEach( objectInterface => {
+      if( objectInterface.getName() !== name ){
+        objectInterface.deactivate()
+      }
+    })
+  }
 }
 
 const init = () => {
@@ -82,6 +91,7 @@ const init = () => {
   intersecter.addGroup(parsaGroup)
   intersecter.addGroup(radioGroup)
   intersecter.addGroup(notebookGroup)
+  intersecter.addGroup(dollyGrip.getCameraPivot())
 
   mouseListener = new MouseListener(intersecter)
   keyboard = new Keyboard(parsaGroup,audioPlayer)
@@ -108,8 +118,18 @@ const init = () => {
     dollyGrip,
     setActiveInterface
   )
+  noteBookInterface = new NoteBookInterface(
+    noteBook,
+    scene,
+    audioPlayer,
+    intersecter,
+    mouseListener,
+    dollyGrip,
+    setActiveInterface,
+  )
   mapBookInterface = new MapBookInterface(
     mapBook,
+    noteBookInterface,
     intersecter,
     mouseListener,
     dollyGrip,
@@ -118,6 +138,7 @@ const init = () => {
   interfaces.push(parsaInterface)
   interfaces.push(radioInterface)
   interfaces.push(mapBookInterface)
+  interfaces.push(noteBookInterface)
 
 }
 
@@ -153,11 +174,13 @@ const update = () => {
     parsaInterface.update( keysDown, epoch )
     radioInterface.update( keysDown, epoch )
     mapBookInterface.update( undefined, epoch )
+    noteBookInterface.update( keysDown, epoch )
     lastRefreshed = epoch
     segmentDisplay.update(epoch)
+    /*
     if( keysDown[0] === 39 ) noteBook.changePage(true)
     else if( keysDown[0] === 37 ) noteBook.changePage(false)
-    noteBook.animate(epoch)
+    noteBook.animate(epoch)*/
   }
   
   renderer.render(scene,camera)

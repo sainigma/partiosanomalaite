@@ -4,11 +4,12 @@ import { loadTexture } from './../utils/gltfUtils'
 
 export class NoteBook {
 
-  constructor(owner, mapBook, camera){
+  constructor(owner, mapBook){
     this.outlineIndex
     this.noteBookIndex
     this.pageIndex
 
+    this.noteBookGroup = owner
     this.manager = new THREE.LoadingManager()
     this.notebookDiv = document.createElement('div')
     document.getElementById('debug').appendChild(this.notebookDiv)
@@ -22,18 +23,18 @@ export class NoteBook {
       this.notebookDiv.appendChild(document.createTextNode('complete'))
     }
 
+    
+
     this.mapBook = mapBook
-    this.camera = camera
 
     this.selectedPage = 0
-    this.pagesLength = 8
+    this.pagesLength = 99
     this.animation = {
       isAnimating: false,
       startTime: -1,
-      duration: 0.75,
+      duration: 0.5,
       direction:true
     }
-    this.isAnimating = false
 
     const path = 'textures/vihko/1024/'
 
@@ -44,16 +45,30 @@ export class NoteBook {
     this.noteBookSurface
     this.pageSurface
 
-    this.baseTexture = loadTexture('vihko','png',path,this.notebookDiv)
+    this.baseTexture = loadTexture('vihko','png',path)
     this.pages = this.loadPages('text_','png',path,this.pagesLength)
     console.log( this.pages )
     this.loadModel(owner)
 
     this.initialPosition = new THREE.Vector3(0.02,0.12,-0.7)
     this.intiialRotation = new THREE.Vector3(0,6.28*0.06,0.1)
+    this.mapBookPosition = this.mapBook.getInitialPosition()
+  }
+
+  resetTransforms(){
+    this.vihko.position.set(
+      this.mapBookPosition.x+this.initialPosition.x,
+      this.mapBookPosition.y+this.initialPosition.y,
+      this.mapBookPosition.z+this.initialPosition.z
+    )
+    this.vihko.rotation.set(this.intiialRotation.x,this.intiialRotation.y,this.intiialRotation.z)
   }
 
   loadPages(name, filetype, path, pagesLength){
+    const onLoad = (index, texture) => {
+      pages[index] = texture
+    }
+
     const pad = (value) => {
       return ("0"+value).slice(-2)
     }
@@ -61,7 +76,8 @@ export class NoteBook {
     let pages = []
     for(let i=0; i<pagesLength; i++){
       const trueName = `${name}${pad(i+1)}`
-      pages.push( loadTexture(trueName, filetype, path, this.notebookDiv) )
+      const pageTexture = loadTexture(trueName, filetype, path, onLoad)
+      pages.push( pageTexture )
     }
     return pages
   }
@@ -87,9 +103,11 @@ export class NoteBook {
         }else if( child.name === 'sivu' ){
           this.pageIndex = index
           child.visible = false
-        }else{
+        }else if( child.name === 'vihko' ){
           this.noteBookIndex = index
           child.visible = true
+        }else{
+          child.visible = false
         }
       })
       this.noteBookMaterial = findMaterialFromChildren( vihko.children[this.noteBookIndex].children, 'vihko' )
@@ -106,11 +124,10 @@ export class NoteBook {
       this.page = vihko.children[this.pageIndex]
       vihko.scale.set(10,10,10)
       vihko.name = 'vihko'
-      const mapBookPosition = this.mapBook.getInitialPosition()
       vihko.position.set(
-        mapBookPosition.x+this.initialPosition.x,
-        mapBookPosition.y+this.initialPosition.y,
-        mapBookPosition.z+this.initialPosition.z
+        this.mapBookPosition.x+this.initialPosition.x,
+        this.mapBookPosition.y+this.initialPosition.y,
+        this.mapBookPosition.z+this.initialPosition.z
       )
       vihko.rotation.set(this.intiialRotation.x,this.intiialRotation.y,this.intiialRotation.z)
       this.vihko = vihko
@@ -121,7 +138,7 @@ export class NoteBook {
   lerpPageRotation(value){
     if( this.vihko !== undefined ){
       const startRotation = new THREE.Vector2(-3.141*0.05,0)
-      const endRotation = new THREE.Vector2(-3.141*1.95,0)
+      const endRotation = new THREE.Vector2(-3.141*1.5,0)
       const currentRotation = startRotation.lerp(endRotation,value)
       this.vihko.children[this.pageIndex].rotation.x = currentRotation.x
     }
@@ -143,12 +160,17 @@ export class NoteBook {
         this.animation.direction = direction
  
         if( direction ){
+          this.animation.isAnimating = true
+          this.pageSurface.map = this.pages[this.selectedPage]
+          this.selectedPage++
+          this.noteBookSurface.map = this.pages[this.selectedPage]
+          /*
           if( this.selectedPage+1 < this.pagesLength ){
             this.animation.isAnimating = true
             this.pageSurface.map = this.pages[this.selectedPage]
             this.selectedPage++
             this.noteBookSurface.map = this.pages[this.selectedPage]
-          }
+          }*/
         }else{
           if( this.selectedPage-1 >= 0 ){
             this.animation.isAnimating = true
@@ -159,6 +181,8 @@ export class NoteBook {
 
         }
         return true
+      }else{
+        console.log('hmm')
       }
     }
     return false

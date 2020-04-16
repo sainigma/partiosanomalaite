@@ -58,7 +58,8 @@ export class GenericInterface{
       const firstHover = this.intersecter.getFirstHover()
       if( firstHover ){
         if( this.hoverObjectNames.includes( firstHover.object.parent.name ) ){
-          if( this.mouseListener.mouse === 1 ){
+          if( this.mouseListener.mouse === 1 && this.bouncer.mouseDebounced ){
+            this.bouncer.mouseDebounced = false
             this.toggleActive()
             this.model.setOutline(false)
           }else{
@@ -69,6 +70,9 @@ export class GenericInterface{
         }
       }else{
         this.model.setOutline(false)
+      }
+      if( this.mouseListener.mouse === 0 ){
+        this.bouncer.mouseDebounced = true
       }
     }
   }

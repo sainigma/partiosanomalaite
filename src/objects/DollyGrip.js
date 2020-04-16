@@ -5,6 +5,7 @@ export class DollyGrip{
     this.camera = camera
     this.cameraSetNamedView('default')
     this.cameraPivot = new THREE.Group()
+    this.bindTarget = new THREE.Vector3( -1.2,0.8,-2.5 )
     this.cameraPivot.add( camera )
     this.animations = []
   }

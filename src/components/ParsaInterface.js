@@ -368,8 +368,17 @@ export class ParsaInterface extends ClassAggregator{
   }
   keyCodesWithMouseActions(keyCodes){
     const firstHover = this.intersecter.getFirstHover()
+    if( !firstHover ){
+      return keyCodes
+    }
+    let keyCode = firstHover.object.name
+    const cases = ['left','right','dot','shift','enter','backspace','end']
+    if( !Number.isNaN(parseInt(keyCode)) || cases.includes(keyCode) ){
+      document.getElementById('root').style.cursor = 'pointer'
+    }else{
+      document.getElementById('root').style.cursor = 'auto'
+    }
     if( this.mouseListener.mouse === 1 && firstHover ){
-      let keyCode = firstHover.object.name
       switch( keyCode ){
         case 'left':
           keyCode = 37
@@ -398,7 +407,7 @@ export class ParsaInterface extends ClassAggregator{
         default:
           keyCode = parseInt(keyCode)
       }
-      if( keyCode !== NaN ){
+      if( !Number.isNaN(keyCode) ){
         if( keyCodes.length > 0 && keyCodes[0] === 16 || keyCodes[0] === 60 ){
           return [ 16, keyCode ]
         }

@@ -17,13 +17,12 @@ export class Intersecter{
         -( clientY / window.innerHeight ) * 2 + 1
       )
       this.raycaster.setFromCamera( userClickedAt, this.camera )
-      
+      this.raycaster.near = 0.1
       let intersects = []
       this.objectGroups.forEach( objectGroup => {
         const currentIntersects = this.raycaster.intersectObjects( objectGroup.children, true )
         if( currentIntersects.length > 0 ){
           intersects = [...intersects, ...currentIntersects]
-          //console.log(intersects)
         }
       })
       this.hovered = intersects
@@ -32,8 +31,24 @@ export class Intersecter{
   addGroup(objectGroup){
     this.objectGroups.push(objectGroup)
   }
+  contains(name){
+    const hoveredNames = this.hovered.map( hover => hover.object.name )
+    if( hoveredNames.includes(name) )return true
+    //console.log( hoveredNames )
+    return false
+  }
   getFirstHover(){
-    if( this.hovered.length > 0 ) return this.hovered[0]
+    if( this.hovered.length > 0 ){
+      let distance = 100
+      let hoverIndex = -1
+      this.hovered.forEach( (hover,index) => {
+        if( hover.distance < distance ){
+          distance = hover.distance
+          hoverIndex = index
+        }
+      })
+      return this.hovered[hoverIndex]
+    }
     return false
   }
 }
