@@ -8,6 +8,7 @@ import { EnviroSphere } from './objects/EnviroSphere'
 import { DollyGrip } from './objects/DollyGrip'
 import { NoteBook } from './objects/NoteBook'
 import { MapBook } from './objects/MapBook'
+import { Ground } from './objects/Ground'
 
 import { ParsaInterface } from './components/ParsaInterface'
 import { RadioInterface } from './components/RadioInterface'
@@ -24,7 +25,7 @@ import './styles.css'
 
 let camera,scene,renderer
 let parsaGroup,radioGroup,notebookGroup,dollyGrip
-let segmentDisplay,parsa,enviroSphere,keyboard,radio,noteBook,mapBook
+let segmentDisplay,parsa,enviroSphere,keyboard,radio,noteBook,mapBook,ground
 let parsaInterface, radioInterface, mapBookInterface, noteBookInterface, interfaces = []
 let keyListener, mouseListener, serverComms, audioPlayer
 let intersecter
@@ -66,6 +67,7 @@ const init = () => {
   radioGroup = new THREE.Group()
   notebookGroup = new THREE.Group()
 
+  ground = new Ground(scene)
   dollyGrip = new DollyGrip(camera)
   parsa = new Parsa(parsaGroup)
   radio = new Radio(radioGroup)
