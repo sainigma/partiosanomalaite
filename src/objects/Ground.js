@@ -24,6 +24,7 @@ export class Ground {
     let loader = new GLTFLoader(manager).setPath('models/')
     loader.load('maasto.gltf', (gltf) => {
       let maasto = gltf.scene
+      maasto.position.z = - 1
       maasto.scale.set(10,10,10)
       maasto.name = 'maasto'
       this.maasto = maasto
