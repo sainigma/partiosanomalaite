@@ -47,7 +47,6 @@ export class NoteBook {
 
     this.baseTexture = loadTexture('vihko','png',path)
     this.pages = this.loadPages('text_','png',path,this.pagesLength)
-    console.log( this.pages )
     this.loadModel(owner)
 
     this.initialPosition = new THREE.Vector3(0.02,0.12,-0.7)
@@ -164,13 +163,6 @@ export class NoteBook {
           this.pageSurface.map = this.pages[this.selectedPage]
           this.selectedPage++
           this.noteBookSurface.map = this.pages[this.selectedPage]
-          /*
-          if( this.selectedPage+1 < this.pagesLength ){
-            this.animation.isAnimating = true
-            this.pageSurface.map = this.pages[this.selectedPage]
-            this.selectedPage++
-            this.noteBookSurface.map = this.pages[this.selectedPage]
-          }*/
         }else{
           if( this.selectedPage-1 >= 0 ){
             this.animation.isAnimating = true

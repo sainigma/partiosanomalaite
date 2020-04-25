@@ -5,6 +5,8 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 export class Radio {
   constructor(owner){
     this.outlineIndex
+    this.dot
+    this.active = true
     this.singleDisplay = new THREE.Group()
     this.frequencyDisplay = new FrequencyDisplay()
     this.loadModel(owner)
@@ -19,6 +21,8 @@ export class Radio {
       }else if( child.name.includes('segmentti') ){
         if( child.name !== 'segmenttiDot' ){
           segments.push(child)
+        }else{
+          this.dot = child
         }
       }
     })
@@ -66,5 +70,13 @@ export class Radio {
     if( this.radio !== undefined ){
       this.radio.children[this.outlineIndex].visible = state
     }
+  }
+  setFrequency(newFrequency){
+    this.frequencyDisplay.changeFrequency(newFrequency)
+  }
+  setActive(isActive){
+    this.active = isActive
+    this.frequencyDisplay.setActive(isActive)
+    this.dot.visible = isActive
   }
 }

@@ -56,7 +56,7 @@ export class FrequencyDisplay {
         const splitter = child.name.split('segmentti')
         child.shorthand = splitter[1]
       }
-      child.visible = activeSegments.includes( child.shorthand )
+      child.visible = activeSegments.includes( child.shorthand ) && this.active
     })
   }
   setDisplay(){
@@ -73,5 +73,6 @@ export class FrequencyDisplay {
   setActive(isActive){
     this.displayGroup.visible = isActive
     this.active = isActive
+    this.setDisplay()
   }
 }
