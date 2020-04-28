@@ -4,7 +4,7 @@ export class FrequencyDisplay {
   constructor(){
     this.displayGroup = new THREE.Group()
     this.value = ''
-    this.active = true
+    this.active = false
   }
   enumerator(value){
     switch(value){

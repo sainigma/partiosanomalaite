@@ -1,15 +1,86 @@
 import * as THREE from 'three'
-import { FrequencyDisplay } from './FrequencyDisplay'
+import { FrequencyDisplay } from './Radio/FrequencyDisplay'
+import { Dial } from './Radio/Dial'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 
 export class Radio {
   constructor(owner){
+    this.dials = {
+      MHz:undefined,
+      KHz:undefined,
+      channel:undefined,
+      power:undefined,
+      volume:undefined,
+      mode:undefined
+    }
     this.outlineIndex
     this.dot
-    this.active = true
+    this.active = false
     this.singleDisplay = new THREE.Group()
     this.frequencyDisplay = new FrequencyDisplay()
     this.loadModel(owner)
+  }
+
+  dialEnumerator(name){
+    switch(name){
+      case 'MHz':
+        return this.dials.MHz
+      case 'KHz':
+        return this.dials.KHz
+      case 'volume':
+        return this.dials.volume
+      case 'power':
+        return this.dials.power
+      case 'channel':
+        return this.dials.channel
+      case 'mode':
+        return this.dials.mode
+    }
+    return undefined
+  }
+  getDial(name){
+    const target = this.dialEnumerator(name)
+    if( target === undefined ) return -1
+    return target.get()
+  }
+  setDial(name,value){
+    const target = this.dialEnumerator(name)
+    if( target === undefined ) return -1
+    target.set(value)
+  }
+  moveDial(name,positive){
+    const target = this.dialEnumerator(name)
+    if( target === undefined ) return -1
+    positive ? target.increment() : target.decrement()
+  }
+
+  resetDial(name){
+    const target = this.dialEnumerator(name)
+    if( target === undefined ) return -1
+    target.reset()
+  }
+
+  assignDial(child){
+    switch(child.name){
+      case 'MHzValitsin':
+        this.dials.MHz = new Dial(child,1,1,30)
+        break
+      case 'KHzValitsin':
+        this.dials.KHz = new Dial(child,1,1,-30)
+        break
+      case 'volyymiValitsin':
+        this.dials.volume = new Dial(child,100,0,10)
+        break
+      case 'virtaTehoValitsin':
+        this.dials.power = new Dial(child,3,0,27)
+        break
+      case 'kanavaValitsin':
+        this.dials.channel = new Dial(child,9,0,-29.93)
+        break
+      case 'modeValitsin':
+        this.dials.mode = new Dial(child,3,1,-30)
+        break
+    }
   }
 
   splitChildren(){
@@ -22,11 +93,15 @@ export class Radio {
         if( child.name !== 'segmenttiDot' ){
           segments.push(child)
         }else{
+          child.visible = false
           this.dot = child
         }
+      }else if( child.name.includes('Valitsin') ){
+        this.assignDial(child)
       }
     })
     this.initFrequencyDisplay(segments)
+    
   }
 
   initFrequencyDisplay(segments){
@@ -34,6 +109,7 @@ export class Radio {
       this.singleDisplay.add(segment)
     })
     this.frequencyDisplay.createDisplay(this.singleDisplay, this.radio)
+    console.log(this.dials)
   }
 
   loadModel(owner){

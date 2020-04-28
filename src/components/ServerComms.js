@@ -13,6 +13,7 @@ export class ServerComms{
       checksum2: '',
     }
     this.success = 0
+    this.power = false
 
     this.audioPlayer = audioPlayer
     this.socket = new WebSocket('ws://localhost:8080')
@@ -34,22 +35,24 @@ export class ServerComms{
   }
 
   sendMessage(destination, message, checksums, keys){
-    const key = keys.key1.length === 32 ? keys.key1 : keys.key2
-    const checksum = checksums.key1.length===4?checksums.key1:checksums.key2
-    const content = JSON.stringify({
-      checksum,
-      message
-    }) 
-
-    const encryptedContent = encryptMessage(content, key)
-    let transmission = {
-      type:'transmit',
-      destination,
-      content:encryptedContent,
-      checksum
+    if( this.power ){
+      const key = keys.key1.length === 32 ? keys.key1 : keys.key2
+      const checksum = checksums.key1.length===4?checksums.key1:checksums.key2
+      const content = JSON.stringify({
+        checksum,
+        message
+      }) 
+  
+      const encryptedContent = encryptMessage(content, key)
+      let transmission = {
+        type:'transmit',
+        destination,
+        content:encryptedContent,
+        checksum
+      }
+      transmission = JSON.stringify(transmission)
+      this.socket.onopen(transmission)
     }
-    transmission = JSON.stringify(transmission)
-    this.socket.onopen(transmission)
   }
 
   sendSettings(){
@@ -64,6 +67,10 @@ export class ServerComms{
     }
     transmission = JSON.stringify(transmission)
     this.socket.onopen(transmission)
+  }
+
+  setPower(power){
+    this.power = power
   }
 
   updateFrequency(frequency){
@@ -90,7 +97,6 @@ export class ServerComms{
   }
 
   send(type,message,target){
-
     let transmission = {
       type,
       message,
@@ -113,39 +119,41 @@ export class ServerComms{
     return messages
   }
 
-  incomingMessage(event){
-    try{
-      let transmission = JSON.parse(event.data)
-      switch(transmission.type){
-        case 'handshake':
-          this.hasHandshakes = true
-          console.log('yk')
-          this.audioPlayer.play('yk')
-          break
-        case 'burst':
-          this.audioPlayer.play('burst')
-          console.log(transmission)
-          console.log('brrrrrr')
-          break
-        case 'transmitOk':
-          this.audioPlayer.play('burst')
-          this.success = 200
-          break
-        case 'message':
-          this.audioPlayer.play('burst')
-          console.log(transmission)
-          if( this.messages.length < 8 ){
-            transmission.time=Date.now()
+  incomingMessage(event) {
+    if (this.power) {
+      try {
+        let transmission = JSON.parse(event.data)
+        switch (transmission.type) {
+          case 'handshake':
+            this.hasHandshakes = true
+            console.log('yk')
+            this.audioPlayer.play('yk')
+            break
+          case 'burst':
+            this.audioPlayer.play('burst')
             console.log(transmission)
-            const decryptedContent = decryptMessage(transmission.content,this.keys.key1)
-            if( decryptedContent !== undefined ){
-              transmission.content = decryptedContent
-              this.messages.push(transmission)
-              this.hasMessages = true
+            console.log('brrrrrr')
+            break
+          case 'transmitOk':
+            this.audioPlayer.play('burst')
+            this.success = 200
+            break
+          case 'message':
+            this.audioPlayer.play('burst')
+            console.log(transmission)
+            if (this.messages.length < 8) {
+              transmission.time = Date.now()
+              console.log(transmission)
+              const decryptedContent = decryptMessage(transmission.content, this.keys.key1)
+              if (decryptedContent !== undefined) {
+                transmission.content = decryptedContent
+                this.messages.push(transmission)
+                this.hasMessages = true
+              }
             }
-          }
-          break
-      }
-    }catch(error){}
+            break
+        }
+      } catch (error) { }
+    }
   }
 }
