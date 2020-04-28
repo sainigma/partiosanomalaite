@@ -5,7 +5,7 @@ export class ServerComms{
     this.messages = []
 
     this.settings = {
-      frequency: 84.225,
+      frequency: 30.000,
       callsign: '',
       group: '',
       subgroup: '',
@@ -65,6 +65,7 @@ export class ServerComms{
       checksum1:this.settings.checksum1,
       checksum2:this.settings.checksum2,
     }
+    console.log(transmission)
     transmission = JSON.stringify(transmission)
     this.socket.onopen(transmission)
   }
@@ -89,8 +90,6 @@ export class ServerComms{
     this.settings.checksum1 = params.checksum1 !== undefined ? params.checksum1 : this.settings.checksum1
     this.settings.checksum2 = params.checksum2 !== undefined ? params.checksum2 : this.settings.checksum2
     
-
-    console.log(this.settings)
     if( this.settings.callsign !== '' && ( this.settings.checksum1 !== '' || this.settings.checksum2 !== '' ) ){
       this.sendSettings()
     }

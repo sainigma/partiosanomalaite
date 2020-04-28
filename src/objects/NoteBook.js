@@ -5,6 +5,10 @@ import { loadTexture } from './../utils/gltfUtils'
 export class NoteBook {
 
   constructor(owner, mapBook){
+    this.owner = owner
+
+    this.loadStarted = false
+    this.loadingComplete = false
     this.outlineIndex
     this.noteBookIndex
     this.pageIndex
@@ -21,6 +25,7 @@ export class NoteBook {
     }
     this.manager.onLoad = () => {
       this.notebookDiv.appendChild(document.createTextNode('complete'))
+      this.loadingComplete = true
     }
 
     
@@ -47,7 +52,7 @@ export class NoteBook {
 
     this.baseTexture = loadTexture('vihko','png',path)
     this.pages = this.loadPages('text_','png',path,this.pagesLength)
-    this.loadModel(owner)
+    //this.loadModel()
 
     this.initialPosition = new THREE.Vector3(0.02,0.12,-0.7)
     this.intiialRotation = new THREE.Vector3(0,6.28*0.06,0.1)
@@ -81,8 +86,8 @@ export class NoteBook {
     return pages
   }
 
-  loadModel(owner){
-
+  loadModel(){
+    this.loadStarted = true
     const findMaterialFromChildren = (children, name) => {
       let result
       children.forEach( child => {
@@ -130,7 +135,7 @@ export class NoteBook {
       )
       vihko.rotation.set(this.intiialRotation.x,this.intiialRotation.y,this.intiialRotation.z)
       this.vihko = vihko
-      owner.add(vihko)
+      this.owner.add(vihko)
     })
   }
 

@@ -13,7 +13,7 @@ export class RadioInterface extends GenericInterface{
     this.frequency = {
       min:30000,
       max:85975,
-      update:true,
+      update:false,
       increment:1025,
       value:30000,
       lastChanged:0,
@@ -131,7 +131,6 @@ export class RadioInterface extends GenericInterface{
   setFrequency(value){
     this.frequency.value = value
     this.radio.setFrequency(value)
-    this.serverComms.updateFrequency(value/1E3)
   }
   updateFrequency(epoch){
     if( this.power && this.frequency.update && epoch - this.frequency.lastChanged > this.frequency.delay ){
@@ -163,7 +162,9 @@ export class RadioInterface extends GenericInterface{
     }else{
       this.bouncer.debounced = true
       if( this.frequency.update ){
+        console.log("moi")
         this.resetFrequency()
+        this.serverComms.updateFrequency(this.frequency.value/1E3)
       }
     }
   }

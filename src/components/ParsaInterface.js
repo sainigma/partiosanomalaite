@@ -27,6 +27,7 @@ export class ParsaInterface extends ClassAggregator{
     this.dollyTransitionTime = 0.34
 
     this.parsa = parsa
+    this.model = parsa
     this.parsaGroup = parsaGroup
     this.dollyGrip = dollyGrip
     this.keyboard = keyboard
@@ -82,6 +83,14 @@ export class ParsaInterface extends ClassAggregator{
       startTime:-1,
       duration:0.3
     }
+  }
+
+  loadStarted(){
+    return this.parsa.loadStarted
+  }
+
+  hasLoaded(){
+    return this.parsa.loadingComplete
   }
 
   offState(keyCodes,epoch){

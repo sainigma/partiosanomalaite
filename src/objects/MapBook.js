@@ -5,7 +5,8 @@ export class MapBook {
 
   constructor(owner){
     this.outlineIndex
-    
+    this.owner = owner
+    this.loadStarted = false
     this.loadingComplete = false
 
     this.animation = {
@@ -27,10 +28,11 @@ export class MapBook {
 
     this.initialPosition = new THREE.Vector3(-2.3, 0, -1.5)
     this.karttatasku
-    this.loadModel(owner)
+    //this.loadModel()
   }
 
-  loadModel(owner){
+  loadModel(){
+    this.loadStarted = true
     const manager = new THREE.LoadingManager()
     const mapBookDiv = document.createElement('div')
     document.getElementById('debug').appendChild(mapBookDiv)
@@ -61,7 +63,7 @@ export class MapBook {
       karttatasku.position.set(this.initialPosition.x, this.initialPosition.y, this.initialPosition.z)
       karttatasku.rotation.set(0,6.28*0.05,0)
       this.karttatasku = karttatasku
-      owner.add(karttatasku)
+      this.owner.add(karttatasku)
     })
   }
 

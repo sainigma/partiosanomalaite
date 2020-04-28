@@ -5,6 +5,8 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 
 export class Radio {
   constructor(owner){
+    this.loadStarted = false
+    this.loadingComplete = false
     this.dials = {
       MHz:undefined,
       KHz:undefined,
@@ -13,12 +15,13 @@ export class Radio {
       volume:undefined,
       mode:undefined
     }
+    this.owner = owner
     this.outlineIndex
     this.dot
     this.active = false
     this.singleDisplay = new THREE.Group()
     this.frequencyDisplay = new FrequencyDisplay()
-    this.loadModel(owner)
+    //this.loadModel(owner)
   }
 
   dialEnumerator(name){
@@ -112,7 +115,8 @@ export class Radio {
     console.log(this.dials)
   }
 
-  loadModel(owner){
+  loadModel(){
+    this.loadStarted = true
     const manager = new THREE.LoadingManager()
     const radioDiv = document.createElement('div')
     document.getElementById('debug').appendChild(radioDiv)
@@ -126,6 +130,7 @@ export class Radio {
     manager.onLoad = () => {
       radioDiv.appendChild(document.createTextNode(' complete'))
       this.splitChildren()
+      this.loadingComplete = true
     }
 
     let loader = new GLTFLoader(manager).setPath('models/')
@@ -135,7 +140,7 @@ export class Radio {
       radio.name = 'radio'
       this.radio = radio
       this.radio.add( this.singleDisplay )
-      owner.add(radio)
+      this.owner.add(radio)
     })
   }
 

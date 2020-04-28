@@ -67,7 +67,7 @@ const init = () => {
   radioGroup = new THREE.Group()
   notebookGroup = new THREE.Group()
 
-  //ground = new Ground(scene)
+  ground = new Ground(scene)
   dollyGrip = new DollyGrip(camera)
   parsa = new Parsa(parsaGroup)
   radio = new Radio(radioGroup)
@@ -143,13 +143,33 @@ const init = () => {
   interfaces.push(noteBookInterface)
 
 }
-
+let loadingFinishedAt = 0
 const loadingScreen = () => {
-  if( mapBookInterface.hasLoaded() ){
-    document.getElementById('debug').style.visibility='hidden'
-    requestAnimationFrame(animate)
-    update()
+  if( loadingFinishedAt > 0 ){
+    if( Date.now()/1E3 > (loadingFinishedAt + 0.5) ){
+      document.getElementById('debug').style.visibility='hidden'
+      requestAnimationFrame(animate)
+      update()
+    }else{
+      requestAnimationFrame(loadingScreen)
+    }
   }else{
+    if( !noteBookInterface.hasLoaded() && !noteBookInterface.loadStarted() ){
+      noteBookInterface.model.loadModel()
+    }else if( noteBookInterface.hasLoaded() && !radioInterface.hasLoaded() && !radioInterface.loadStarted() ){
+      radioInterface.model.loadModel()
+    }else if( radioInterface.hasLoaded() && !parsaInterface.hasLoaded() && !parsaInterface.loadStarted() ){
+      parsaInterface.model.loadModel()
+    }else if( parsaInterface.hasLoaded() && !mapBookInterface.hasLoaded() && !mapBookInterface.loadStarted() ){
+      mapBookInterface.model.loadModel()
+    }
+    if( mapBookInterface.hasLoaded()
+        && radioInterface.hasLoaded()
+        && parsaInterface.hasLoaded()
+        && noteBookInterface.hasLoaded()
+      ){
+      loadingFinishedAt = Date.now()/1E3
+    }
     requestAnimationFrame(loadingScreen)
   }
 }
@@ -165,7 +185,6 @@ const update = () => {
   const epoch = Date.now()/1E3
   const keysDown = keyListener.getKeysDown()
   const mouse = mouseListener.getDeltas()
-  const zoom = 1-mouse.y/1080
   if( mouseListener.mouse >= 4 ){
     dollyGrip.rotateAroundY( mouse.x/1e4 )
   }
@@ -179,10 +198,6 @@ const update = () => {
     noteBookInterface.update( keysDown, epoch )
     lastRefreshed = epoch
     segmentDisplay.update(epoch)
-    /*
-    if( keysDown[0] === 39 ) noteBook.changePage(true)
-    else if( keysDown[0] === 37 ) noteBook.changePage(false)
-    noteBook.animate(epoch)*/
   }
   
   renderer.render(scene,camera)
@@ -190,4 +205,3 @@ const update = () => {
 
 init()
 loadingScreen()
-//animate()

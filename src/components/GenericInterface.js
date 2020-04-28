@@ -29,6 +29,14 @@ export class GenericInterface{
     console.log(this.model)
   }
 
+  loadStarted(){
+    return this.model.loadStarted
+  }
+
+  hasLoaded(){
+    return this.model.loadingComplete
+  }
+
   getName(){
     return this.name
   }
