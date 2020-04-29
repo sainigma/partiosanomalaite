@@ -26,7 +26,6 @@ export class GenericInterface{
     }
     this.active = false
     this.hoverObjectNames = hoverObjectNames
-    console.log(this.model)
   }
 
   loadStarted(){

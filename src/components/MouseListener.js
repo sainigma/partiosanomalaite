@@ -3,6 +3,8 @@ export class MouseListener {
     const mouseMove = (event) => {
       const clientX = event.clientX
       const clientY = event.clientY
+      this.x = event.clientX
+      this.y = event.clientY
       this.intersecter.intersect( event.clientX, event.clientY, false )
       if( this.initialMouseX === -1 ){
         this.initialMouseX = clientX
@@ -24,6 +26,8 @@ export class MouseListener {
 
     this.initialMouseX = 1920/2
     this.initialMouseY = 1080/2
+    this.x = 0
+    this.y = 0
     this.deltaX = 0
     this.deltaY = 0
     this.mouse = 0
@@ -32,7 +36,13 @@ export class MouseListener {
     document.addEventListener('pointerdown', mouseButtonToggle, false)
     document.addEventListener('pointerup', mouseButtonToggle, false)
   }
+  getButtons(){
+    return this.mouse
+  }
   getDeltas(){
     return {x:this.deltaX, y:this.deltaY}
+  }
+  getAbsolute(){
+    return {x:this.x, y:this.y}
   }
 }

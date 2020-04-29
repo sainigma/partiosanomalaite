@@ -33,7 +33,7 @@ export class NoteBook {
     this.mapBook = mapBook
 
     this.selectedPage = 0
-    this.pagesLength = 99
+    this.pagesLength = 30
     this.animation = {
       isAnimating: false,
       startTime: -1,

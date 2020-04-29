@@ -46,6 +46,11 @@ export class Radio {
     if( target === undefined ) return -1
     return target.get()
   }
+  getDialObject(name){
+    const target = this.dialEnumerator(name)
+    if( target === undefined ) return -1
+    return target.object
+  }
   setDial(name,value){
     const target = this.dialEnumerator(name)
     if( target === undefined ) return -1
@@ -112,7 +117,6 @@ export class Radio {
       this.singleDisplay.add(segment)
     })
     this.frequencyDisplay.createDisplay(this.singleDisplay, this.radio)
-    console.log(this.dials)
   }
 
   loadModel(){

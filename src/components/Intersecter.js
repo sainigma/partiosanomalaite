@@ -34,7 +34,6 @@ export class Intersecter{
   contains(name){
     const hoveredNames = this.hovered.map( hover => hover.object.name )
     if( hoveredNames.includes(name) )return true
-    //console.log( hoveredNames )
     return false
   }
   getFirstHover(){

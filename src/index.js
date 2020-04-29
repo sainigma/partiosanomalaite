@@ -67,7 +67,7 @@ const init = () => {
   radioGroup = new THREE.Group()
   notebookGroup = new THREE.Group()
 
-  ground = new Ground(scene)
+  //ground = new Ground(scene)
   dollyGrip = new DollyGrip(camera)
   parsa = new Parsa(parsaGroup)
   radio = new Radio(radioGroup)
