@@ -10,14 +10,28 @@ export class Dial{
       this.targetOriginalPosition = object3d.children[0].position.clone()
     }
   }
-  moveTarget(offset){
+  moveTarget(ogOffset){
     const originalPosition = this.targetOriginalPosition
+    let offset = ogOffset
+    if( offset.y > 0.01 ){
+      offset.y = 0.01
+    }else if( offset.y < -0.01 ){
+      offset.y = -0.01
+    }
     this.object.children[0].position.set(originalPosition.x+offset.x, originalPosition.y+offset.y, originalPosition.z)
-    const angle = Math.atan( this.object.children[0].position.y / this.object.children[0].position.x  )
-    if( angle < this.stepAngleRads*0.6 ){
-      this.increment()
-    }else if( angle > -this.stepAngleRads*0.6 ){
-      this.decrement()
+    let angle = Math.atan( this.object.children[0].position.y / this.object.children[0].position.x  )
+    if( this.stepAngleRads < 0 ){
+      if( angle < this.stepAngleRads*0.6 ){
+        this.increment()
+      }else if( angle > -this.stepAngleRads*0.6 ){
+        this.decrement()
+      }
+    }else{
+      if( angle > this.stepAngleRads*0.6 ){
+        this.increment()
+      }else if( angle < -this.stepAngleRads*0.6 ){
+        this.decrement()
+      }
     }
   }
   resetTarget(){
