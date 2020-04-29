@@ -55,7 +55,7 @@ export class RadioInterface extends GenericInterface{
   }
 
   initDials(){
-    const KHzDial = this.radio.getDialObject('KHz')
+    const KHzDial = this.radio.getDialModel('KHz')
     this.radioIntersecter.addGroup( KHzDial )
   }
 
@@ -207,8 +207,10 @@ export class RadioInterface extends GenericInterface{
 
   initDragTarget(target, cursor){
     const targetDialName = target.object.name.split('DragTarget')[0]
+    const targetDial = this.radio.getDialObject(targetDialName)
     this.dragTarget = {
-      dial:this.radio.getDialObject(targetDialName),
+      dial:targetDial,
+      dialStartState:targetDial.state,
       object:target.object,
       distance:target.distance,
       cursorAtStart:cursor,
@@ -238,16 +240,18 @@ export class RadioInterface extends GenericInterface{
         x: (newDelta.x/this.dragTarget.inner.width)*this.dragTarget.fov.horizontal,
         y: (newDelta.y/this.dragTarget.inner.height)*this.dragTarget.fov.vertical,
       }
-      this.dragTarget.object.position.x = 0.1 * attitudeDelta.x * this.dragTarget.distance
-      this.dragTarget.object.position.y = 0.1 * attitudeDelta.y * this.dragTarget.distance
+      this.dragTarget.dial.moveTarget({
+        x:0.1 * attitudeDelta.x * this.dragTarget.distance,
+        y:0.1 * attitudeDelta.y * this.dragTarget.distance
+      })
     }
   }
 
   resetDragTarget(){
-    this.dragTarget.object.position.x = 0
-    this.dragTarget.object.position.y = 0
+    this.dragTarget.dial.resetTarget()
     this.dragTarget = {
       dial:undefined,
+      dialStartState:undefined,
       object:undefined,
       distance:0,
       cursorAtStart:{
@@ -281,7 +285,13 @@ export class RadioInterface extends GenericInterface{
           if( firstHover ){
             this.dragTarget.distance = firstHover.distance
           }
-          this.moveDragTarget(cursorLocation)
+          if( this.dragTarget.dialStartState === this.dragTarget.dial.state ){
+            this.moveDragTarget(cursorLocation)
+          }else{
+            this.dragTarget.dial.resetTarget()
+            this.dragTarget.cursorAtStart = cursorLocation
+            this.dragTarget.dialStartState = this.dragTarget.dial.state
+          }
         }
       }else{
         if( this.dragTarget.object !== undefined ){

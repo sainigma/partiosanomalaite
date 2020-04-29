@@ -49,6 +49,11 @@ export class Radio {
   getDialObject(name){
     const target = this.dialEnumerator(name)
     if( target === undefined ) return -1
+    return target
+  }
+  getDialModel(name){
+    const target = this.dialEnumerator(name)
+    if( target === undefined ) return -1
     return target.object
   }
   setDial(name,value){

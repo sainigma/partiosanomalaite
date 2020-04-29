@@ -5,6 +5,23 @@ export class Dial{
     this.decrementSteps = decrementSteps
     this.stepAngleRads = 2*3.14159*(stepAngle/360)
     this.state = 0
+    if( object3d.children.length > 0 ){
+      object3d.children[0].visible = false
+      this.targetOriginalPosition = object3d.children[0].position.clone()
+    }
+  }
+  moveTarget(offset){
+    const originalPosition = this.targetOriginalPosition
+    this.object.children[0].position.set(originalPosition.x+offset.x, originalPosition.y+offset.y, originalPosition.z)
+    const angle = Math.atan( this.object.children[0].position.y / this.object.children[0].position.x  )
+    if( angle < this.stepAngleRads*0.6 ){
+      this.increment()
+    }else if( angle > -this.stepAngleRads*0.6 ){
+      this.decrement()
+    }
+  }
+  resetTarget(){
+    this.moveTarget({x:0,y:0})
   }
   increment(){
     if( this.state + 1 <= this.incrementSteps ){
