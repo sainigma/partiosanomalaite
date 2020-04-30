@@ -15,13 +15,16 @@ export class Radio {
       volume:undefined,
       mode:undefined
     }
+    this.backlight = false
+    this.radioMaterial
+    this.backLightMaterial
+    this.lcdBackground
     this.owner = owner
     this.outlineIndex
     this.dot
     this.active = false
     this.singleDisplay = new THREE.Group()
     this.frequencyDisplay = new FrequencyDisplay()
-    //this.loadModel(owner)
   }
 
   dialEnumerator(name){
@@ -76,22 +79,22 @@ export class Radio {
   assignDial(child){
     switch(child.name){
       case 'MHzValitsin':
-        this.dials.MHz = new Dial(child,1,1,30)
+        this.dials.MHz = new Dial(child,1,1,30,0)
         break
       case 'KHzValitsin':
-        this.dials.KHz = new Dial(child,1,1,-30)
+        this.dials.KHz = new Dial(child,1,1,-30,0)
         break
       case 'volyymiValitsin':
-        this.dials.volume = new Dial(child,100,0,10)
+        this.dials.volume = new Dial(child,10,0,30,1.046)
         break
       case 'virtaTehoValitsin':
-        this.dials.power = new Dial(child,3,0,27)
+        this.dials.power = new Dial(child,3,0,27,0.697)
         break
       case 'kanavaValitsin':
-        this.dials.channel = new Dial(child,9,0,-29.93)
+        this.dials.channel = new Dial(child,9,0,-29.93,-0.785)
         break
       case 'modeValitsin':
-        this.dials.mode = new Dial(child,3,1,-30)
+        this.dials.mode = new Dial(child,3,1,-30,-1.081)
         break
     }
   }
@@ -111,6 +114,13 @@ export class Radio {
         }
       }else if( child.name.includes('Valitsin') ){
         this.assignDial(child)
+      }else if( child.name === 'lcdTausta' ){
+        this.lcdBackground = child
+        this.radioMaterial = this.lcdBackground.material
+        
+        this.backLightMaterial = new THREE.MeshBasicMaterial({
+          color:0x3ffc00
+        })
       }
     })
     this.initFrequencyDisplay(segments)
@@ -168,5 +178,14 @@ export class Radio {
     this.active = isActive
     this.frequencyDisplay.setActive(isActive)
     this.dot.visible = isActive
+  }
+  setBacklight(state){
+    if( state && !this.backlight ){
+      this.backlight = true
+      this.lcdBackground.material = this.backLightMaterial
+    }else if( !state && this.backlight ){
+      this.backlight = false
+      this.lcdBackground.material = this.radioMaterial
+    }
   }
 }

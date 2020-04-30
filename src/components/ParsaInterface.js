@@ -16,12 +16,12 @@ export class ParsaInterface extends ClassAggregator{
     super()
 
     let date = new Date()
-    this.version = 'V 20200402A'
+    this.version = 'V YYYYMMDDX'
     this.name = 'parsa'
     this.info = {
       year:date.getFullYear()
     }
-    this.skipIntro = true
+    this.skipIntro = false
     this.display = display
     this.shiftToggled = false
     this.dollyTransitionTime = 0.34

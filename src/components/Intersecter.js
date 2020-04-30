@@ -3,6 +3,7 @@ export class Intersecter{
   constructor(window, camera){
     this.objectGroups = []
     this.hovered = []
+    this.active = true
     this.window = {
       innerWidth:window.innerWidth,
       innerHeight:window.innerHeight,
@@ -11,7 +12,7 @@ export class Intersecter{
     this.camera = camera
   }
   intersect( clientX, clientY ){
-    if( this.objectGroups.length > 0 && this.objectGroups[0] !== undefined ){
+    if( this.active && this.objectGroups.length > 0 && this.objectGroups[0] !== undefined ){
       const userClickedAt = new THREE.Vector2(
         ( clientX / window.innerWidth ) * 2 - 1,
         -( clientY / window.innerHeight ) * 2 + 1
@@ -37,7 +38,7 @@ export class Intersecter{
     return false
   }
   getFirstHover(){
-    if( this.hovered.length > 0 ){
+    if( this.hovered.length > 0 && this.active){
       let distance = 100
       let hoverIndex = -1
       this.hovered.forEach( (hover,index) => {
@@ -49,5 +50,11 @@ export class Intersecter{
       return this.hovered[hoverIndex]
     }
     return false
+  }
+  disable(){
+    this.active = false
+  }
+  activate(){
+    this.active = true
   }
 }

@@ -14,6 +14,12 @@ dotenv = dotenv.map( item => {
   }
 })
 
+const parsaVersion = () => {
+  const pad = (input) => { return input < 10 ? `0${input}` : input }
+  let versionDate = new Date()
+  return `V ${versionDate.getFullYear()}${pad(versionDate.getMonth()+1)}${pad(versionDate.getDate())}A`
+}
+
 const dotenvGet = (type) => {
   const result = dotenv.find( item => item.type === type )
   if( result !== undefined ){
@@ -50,7 +56,16 @@ let config = {
           replace: dotenvGet('WSOCK'),
           flags: 'i'
         }
-      }
+      },
+      {
+        test: /\.js$/,
+        loader: 'string-replace-loader',
+        options: {
+          search: 'V YYYYMMDDX',
+          replace: parsaVersion(),
+          flags: 'i'
+        }
+      },
     ]
   },
   plugins: [

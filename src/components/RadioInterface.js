@@ -6,6 +6,7 @@ export class RadioInterface extends GenericInterface{
   constructor(radio, radioGroup, serverComms, audioPlayer, intersecter, mouseListener, dollyGrip, setActiveInterface){
     super(radio, radioGroup, serverComms, audioPlayer, intersecter, mouseListener, ['runko', 'radio', 'runkoOutline'])
     this.radioIntersecter = new Intersecter(window, dollyGrip.camera)
+    this.intersecter = intersecter
     this.radio = radio
     this.name = 'radio'
     this.power = false
@@ -21,7 +22,7 @@ export class RadioInterface extends GenericInterface{
       value:30000,
       lastChanged:0,
       delay:0.08,
-      delayMultiplier:5
+      delayMultiplier:3
     }
     this.dragTarget = {
       dial:undefined,
@@ -62,9 +63,15 @@ export class RadioInterface extends GenericInterface{
     const KHzDial = this.radio.getDialModel('KHz')
     const MHzDial = this.radio.getDialModel('MHz')
     const powerDial = this.radio.getDialModel('power')
+    const channelDial = this.radio.getDialModel('channel')
+    const volumeDial = this.radio.getDialModel('volume')
+    const modeDial = this.radio.getDialModel('mode')
     this.radioIntersecter.addGroup( KHzDial )
     this.radioIntersecter.addGroup( MHzDial )
     this.radioIntersecter.addGroup( powerDial )
+    this.radioIntersecter.addGroup( channelDial )
+    this.radioIntersecter.addGroup( volumeDial )
+    this.radioIntersecter.addGroup( modeDial )
   }
 
   getCameraPosition(){
@@ -163,12 +170,10 @@ export class RadioInterface extends GenericInterface{
     if( this.bouncer.debounced ){
       this.radio.moveDial('power',increasePower)
       const newPower = this.radio.getDial('power') > 0 
-      if( newPower !== this.power ){
-        this.togglePower(newPower)
-      }
     }
     return true
   }
+
   loadFromChannelList(index){
     if( index >= 0 && index < this.channels.list.length ){
       this.channels.active = index
@@ -180,15 +185,17 @@ export class RadioInterface extends GenericInterface{
   resetFrequency(){
     this.frequency.update = false
     this.frequency.increment = 0
-    this.frequency.delayMultiplier = 5
+    this.frequency.delayMultiplier = 3
     this.radio.resetDial('KHz')
     this.radio.resetDial('MHz')
   }
+
   setFrequency(value){
     this.frequency.value = value
     this.channels.list[ this.channels.active ] = value
     this.radio.setFrequency(value)
   }
+
   updateFrequency(epoch){
     if( this.power && this.frequency.update && epoch - this.frequency.lastChanged > this.frequency.delay*this.frequency.delayMultiplier ){
       if( this.frequency.delayMultiplier > 1 ){
@@ -232,6 +239,7 @@ export class RadioInterface extends GenericInterface{
       }
     }
   }
+
   moveDragTarget(cursor){
     const oldDelta = this.dragTarget.cursorDelta
     const newDelta = {
@@ -273,6 +281,7 @@ export class RadioInterface extends GenericInterface{
       fov:undefined
     }
   }
+
   checkForFrequencyUpdates(){
     const MHzState = this.radio.getDial('MHz')
     const KHzState = this.radio.getDial('KHz')
@@ -284,6 +293,32 @@ export class RadioInterface extends GenericInterface{
     return false
   }
 
+  checkForPowerUpdates(){
+    const powerState = this.radio.getDial('power')
+    if( !this.power && (powerState > 0) ){
+      this.togglePower(true)
+    }else if( this.power && (powerState === 0) ){
+      this.togglePower(false)
+    }
+  }
+
+  checkForModeUpdates(){
+    const modeState = this.radio.getDial('mode')
+    if( modeState === 3 && this.dragTarget.object === undefined ){
+      this.radio.setDial('mode',2)
+      this.radio.setBacklight(false)
+    }else if( modeState === 3 && this.power ){
+      this.radio.setBacklight(true)
+    }
+  }
+
+  checkForChannelUpdates(){
+    const channelState = this.radio.getDial('channel')
+    if( this.channels.active !== channelState ){
+      this.loadFromChannelList(channelState)
+    }
+  }
+
   updateWhenActive( keyCodes, epoch ){
 
     const cursorLocation = this.mouseListener.getAbsolute()
@@ -291,7 +326,8 @@ export class RadioInterface extends GenericInterface{
     const firstHover = this.radioIntersecter.getFirstHover()
 
     if( firstHover || this.dragTarget.object !== undefined ){
-      if( this.mouseListener.getButtons() > 0 ){
+      this.intersecter.disable()
+      if( this.mouseListener.getButtons() === 1 ){
         if( this.dragTarget.object === undefined ){
           document.getElementById('root').style.cursor = 'grabbing'
           this.initDragTarget(firstHover, cursorLocation)
@@ -314,19 +350,24 @@ export class RadioInterface extends GenericInterface{
         document.getElementById('root').style.cursor = 'grab'
       }
     }else{
+      this.intersecter.activate()
       document.getElementById('root').style.cursor = 'auto'
     }
 
     if( keyCodes.length > 0 ){
       const frequencyChangedKeys = this.checkKeyCodesForFrequency( keyCodes )
-      const powerChanged = this.checkKeyCodesForPower( keyCodes )
-      const channelChanged = this.checkKeyCodesForChannel( keyCodes )
-      if( frequencyChangedKeys || powerChanged || channelChanged ){
+      const powerChangedKeys = this.checkKeyCodesForPower( keyCodes )
+      const channelChangedKeys = this.checkKeyCodesForChannel( keyCodes )
+      if( frequencyChangedKeys || powerChangedKeys || channelChangedKeys ){
         this.bouncer.debounced = false
       }else{
         this.bouncer.debounced = true
       }
     }
+    
+    this.checkForPowerUpdates()
+    this.checkForChannelUpdates()
+    this.checkForModeUpdates()
     const frequencyChanged = this.checkForFrequencyUpdates()
     if( frequencyChanged ){
       this.updateFrequency(epoch)
