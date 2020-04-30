@@ -6,7 +6,6 @@ export class RadioInterface extends GenericInterface{
   constructor(radio, radioGroup, serverComms, audioPlayer, intersecter, mouseListener, dollyGrip, setActiveInterface){
     super(radio, radioGroup, serverComms, audioPlayer, intersecter, mouseListener, ['runko', 'radio', 'runkoOutline'])
     this.radioIntersecter = new Intersecter(window, dollyGrip.camera)
-    this.intersecter = intersecter
     this.radio = radio
     this.name = 'radio'
     this.power = false
@@ -178,6 +177,7 @@ export class RadioInterface extends GenericInterface{
     if( index >= 0 && index < this.channels.list.length ){
       this.channels.active = index
       this.setFrequency(this.channels.list[index])
+      this.frequency.update = true
       this.radio.setDial("channel",index)
     }
   }
@@ -304,11 +304,24 @@ export class RadioInterface extends GenericInterface{
 
   checkForModeUpdates(){
     const modeState = this.radio.getDial('mode')
-    if( modeState === 3 && this.dragTarget.object === undefined ){
-      this.radio.setDial('mode',2)
-      this.radio.setBacklight(false)
-    }else if( modeState === 3 && this.power ){
-      this.radio.setBacklight(true)
+    const staticPaused = this.audioPlayer.paused('static')
+    if( (modeState !== -1 || !this.power ) && !staticPaused ){
+      this.audioPlayer.stop('static')
+    }
+    switch( modeState ){
+      case -1:
+        if( this.power && staticPaused ){
+          this.audioPlayer.playLooped('static')
+        }
+        break
+      case 3:
+        if( this.dragTarget.object === undefined ){
+          this.radio.setDial('mode',2)
+          this.radio.setBacklight(false)
+        }else if( this.power ){
+          this.radio.setBacklight(true)
+        }
+        break
     }
   }
 
@@ -316,6 +329,14 @@ export class RadioInterface extends GenericInterface{
     const channelState = this.radio.getDial('channel')
     if( this.channels.active !== channelState ){
       this.loadFromChannelList(channelState)
+    }
+  }
+
+  checkForVolumeUpdates(){
+    const volumeState = this.radio.getDial('volume')
+    const volume = (10 - volumeState)/10
+    if( volume !== this.audioPlayer.volume ){
+      this.audioPlayer.setVolume(volume)
     }
   }
 
@@ -368,6 +389,7 @@ export class RadioInterface extends GenericInterface{
     this.checkForPowerUpdates()
     this.checkForChannelUpdates()
     this.checkForModeUpdates()
+    this.checkForVolumeUpdates()
     const frequencyChanged = this.checkForFrequencyUpdates()
     if( frequencyChanged ){
       this.updateFrequency(epoch)
