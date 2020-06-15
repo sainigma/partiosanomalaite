@@ -332,7 +332,7 @@ export class ParsaInterface extends ClassAggregator{
   getCameraPosition(){
     let newTarget = {
       x:this.parsaGroup.position.x,
-      y:-1,
+      y:this.parsaGroup.position.y,
       z:this.parsaGroup.position.z
     }
     return newTarget
@@ -341,8 +341,8 @@ export class ParsaInterface extends ClassAggregator{
   getLookAtTarget(){
     let newTarget = {
       x:0,
-      y:0,
-      z:0
+      y:2,
+      z:2
     }
     return newTarget
   }
@@ -378,7 +378,8 @@ export class ParsaInterface extends ClassAggregator{
   keyCodesWithMouseActions(keyCodes){
     const firstHover = this.intersecter.getFirstHover()
     if( !firstHover ){
-      return keyCodes
+      if( this.shiftToggled ) return [16, ...keyCodes]
+      else return keyCodes
     }
     let keyCode = firstHover.object.name
     const cases = ['left','right','dot','shift','enter','backspace','end']
@@ -414,7 +415,7 @@ export class ParsaInterface extends ClassAggregator{
           keyCode = 35
           break
         default:
-          keyCode = parseInt(keyCode)
+          keyCode = parseInt(keyCode) 
       }
       if( !Number.isNaN(keyCode) ){
         if( keyCodes.length > 0 && keyCodes[0] === 16 || keyCodes[0] === 60 ){

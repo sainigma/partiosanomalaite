@@ -6,7 +6,6 @@ export class Parsa {
     this.outlineIndex
     this.owner = owner
     this.loadStarted = false
-    //this.loadModel()
     this.loadingComplete = false
   }
   loadModel(){

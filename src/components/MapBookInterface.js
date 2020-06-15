@@ -16,18 +16,18 @@ export class MapBookInterface extends GenericInterface{
 
   getCameraPosition(){
     let newTarget = {
-      x:this.mapBook.karttatasku.position.x,
-      y:0.5,
-      z:this.mapBook.karttatasku.position.z
+      x:this.mapBook.owner.position.x,
+      y:this.mapBook.owner.position.y,
+      z:this.mapBook.owner.position.z
     }
     return newTarget
   }
 
   getLookAtTarget(){
     let newTarget = {
-      x:-this.mapBook.karttatasku.position.x,
-      y:0,
-      z:this.mapBook.karttatasku.position.z
+      x:1,
+      y:4,
+      z:2
     }
     return newTarget
   }

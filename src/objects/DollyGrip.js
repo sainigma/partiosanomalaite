@@ -3,29 +3,28 @@ import * as THREE from 'three'
 export class DollyGrip{
   constructor(camera){
     this.camera = camera
-    this.cameraSetNamedView('default')
+    this.offsets = new THREE.Vector3( -2, 10, 10 )
     this.cameraPivot = new THREE.Group()
     this.bindTarget = new THREE.Vector3( -1.2,0.8,-2.5 )
     this.cameraPivot.add( camera )
+    this.init()
     this.animations = []
   }
-  cameraSetNamedView(name){
-    const position = this.getPosition(name)
-    const lookTarget = this.getView(name)
-    this.camera.position.set( position.x, position.y, position.z )
-    this.camera.lookAt( lookTarget )
-    this.camera.currentTarget = this.getView(name)
+  init(){
+    this.camera.position.set( this.offsets.x, this.offsets.y, this.offsets.z )
+    this.camera.lookAt( this.cameraPivot.getWorldPosition() )
+    this.camera.currentTarget = this.offsets
   }
   getPosition(name){
     switch(name){
       default:
-        return new THREE.Vector3(-0.5, 3, 3)
+        return new THREE.Vector3(this.offsets.x, this.offsets.y, this.offsets.z)
     }
   }
   getView(name){
     switch(name){
       default:
-        return new THREE.Vector3(0,1,0)
+        return new THREE.Vector3(0,0,0)
     }
   }
   getCameraPivot(){
@@ -36,6 +35,7 @@ export class DollyGrip{
   }
   rotateAroundY( value ){
     this.cameraPivot.rotateOnWorldAxis( new THREE.Vector3(0,1,0), value )
+    this.camera.currentTarget.set( this.camera.position.x - this.offsets.x, this.camera.position.y - this.offsets.y, this.camera.position.z - this.offsets.z )
   }
   addTransition(endPosition, endTarget, transitionTime){
     this.animations = [
@@ -69,9 +69,10 @@ export class DollyGrip{
         const currentPosition = currentAnimation.startPosition.clone().lerp( currentAnimation.endPosition, lerpValue )
         const currentTarget = currentAnimation.startTarget.clone().lerp( currentAnimation.endTarget, lerpValue )
         this.cameraPivot.position.set( currentPosition.x, currentPosition.y, currentPosition.z )
-        this.camera.lookAt( currentTarget )
+        this.camera.position.set( currentTarget.x + this.offsets.x, currentTarget.y +this.offsets.y, currentTarget.z+this.offsets.z )
+        this.camera.lookAt( this.cameraPivot.getWorldPosition() )
+        this.camera.currentTarget.set( currentTarget.x, currentTarget.y, currentTarget.z )
         if( lerpValue === 1 ){
-          this.camera.currentTarget.set( currentTarget.x, currentTarget.y, currentTarget.z )
           this.animations.pop()
         }
       }

@@ -75,8 +75,8 @@ export class RadioInterface extends GenericInterface{
 
   getCameraPosition(){
     let newTarget = {
-      x:this.radioGroup.position.x,
-      y:-1.8,
+      x:this.radioGroup.position.x-0.8,
+      y:this.radioGroup.position.y+0.5,
       z:this.radioGroup.position.z+1
     }
     return newTarget
@@ -84,9 +84,9 @@ export class RadioInterface extends GenericInterface{
 
   getLookAtTarget(){
     let newTarget = {
-      x:this.radioGroup.position.x,
-      y:0.5,
-      z:-this.radioGroup.position.z+0.5
+      x:0,
+      y:1,
+      z:2
     }
     return newTarget
   }

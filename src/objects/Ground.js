@@ -22,11 +22,10 @@ export class Ground {
     }
 
     let loader = new GLTFLoader(manager).setPath('models/')
-    loader.load('maasto.gltf', (gltf) => {
+    loader.load('ground.gltf', (gltf) => {
       let maasto = gltf.scene
-      maasto.position.z = - 1
       maasto.scale.set(10,10,10)
-      maasto.name = 'maasto'
+      maasto.name = 'ground'
       this.maasto = maasto
       owner.add(maasto)
     })

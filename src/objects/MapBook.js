@@ -26,7 +26,8 @@ export class MapBook {
     this.noteBookSurface
     this.pageSurface
 
-    this.initialPosition = new THREE.Vector3(-2.3, 0, -1.5)
+    //this.initialPosition = new THREE.Vector3(-2.3, 0, -1.5)
+    this.initialPosition = new THREE.Vector3(0, 0, 0)
     this.karttatasku
     //this.loadModel()
   }
@@ -60,8 +61,8 @@ export class MapBook {
       karttatasku.scale.set(10,10,10)
       karttatasku.name = 'karttatasku'
       
-      karttatasku.position.set(this.initialPosition.x, this.initialPosition.y, this.initialPosition.z)
-      karttatasku.rotation.set(0,6.28*0.05,0)
+      //karttatasku.position.set(this.initialPosition.x, this.initialPosition.y, this.initialPosition.z)
+      //karttatasku.rotation.set(0,6.28*0.05,0)
       this.karttatasku = karttatasku
       this.owner.add(karttatasku)
     })

@@ -23,7 +23,7 @@ import { Intersecter } from './components/Intersecter'
 import './styles.css'
 
 
-let camera,scene,renderer
+let camera,camera2,mainCamera,scene,renderer
 let parsaGroup,radioGroup,notebookGroup,dollyGrip
 let segmentDisplay,parsa,enviroSphere,keyboard,radio,noteBook,mapBook,ground
 let parsaInterface, radioInterface, mapBookInterface, noteBookInterface, interfaces = []
@@ -50,7 +50,12 @@ const init = () => {
   let container
   container = document.getElementById('root')
 
+  camera2 = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.05, 50)
+  camera2.position.set(-10,15,10)
+  camera2.lookAt(0,0,0)
   camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.05, 50)
+
+  mainCamera = camera
 
   scene = new THREE.Scene()
   renderer = new THREE.WebGLRenderer( {alpha: false, antialias: true} )
@@ -67,7 +72,7 @@ const init = () => {
   radioGroup = new THREE.Group()
   notebookGroup = new THREE.Group()
 
-  //ground = new Ground(scene)
+  ground = new Ground(scene)
   dollyGrip = new DollyGrip(camera)
   parsa = new Parsa(parsaGroup)
   radio = new Radio(radioGroup)
@@ -81,15 +86,27 @@ const init = () => {
   scene.add(notebookGroup)
   scene.add(dollyGrip.getCameraPivot())
 
-  radioGroup.position.set(2,0,-2.5)
-  radioGroup.rotateOnWorldAxis( new THREE.Vector3(0,1,0), -3.141*0.19 )
-  scene.rotateOnWorldAxis(new THREE.Vector3(0,1,0),-3.141*0.7)
+  radioGroup.position.set(0.19747*10,0.030103*10,-0.241485*10)
+  radioGroup.rotateY( -33.5*3.14159/180 )
+  radioGroup.rotateX(-3.13*3.14159/180 )
+  radioGroup.rotateZ( 2.66*3.14159/180 )
 
+  notebookGroup.position.set(-0.391283*10, 0.038558*10, -0.103919*10)
+  notebookGroup.rotateY( 27.2971*3.14159/180 )
+  notebookGroup.rotateX( 18.3023*3.14159/180 )
+  notebookGroup.rotateZ( 1.38244*3.14159/180 )
+
+  parsaGroup.position.set(-0.100125*10, 0.002713*10,0.000321*10)
+  parsaGroup.rotateY( -0.129661*3.14159/180 )
+  parsaGroup.rotateX( 6.7524*3.14159/180 )
+  parsaGroup.rotateZ( 0.681243*3.14159/180 )
+
+  scene.rotation.set(0,6.28*1.6,0)
   audioPlayer = new AudioPlayer()
   keyListener = new KeyListener(audioPlayer)
   serverComms = new ServerComms(audioPlayer)
 
-  intersecter = new Intersecter(window, camera)
+  intersecter = new Intersecter(window, mainCamera)
   intersecter.addGroup(parsaGroup)
   intersecter.addGroup(radioGroup)
   intersecter.addGroup(notebookGroup)
@@ -180,7 +197,7 @@ const animate = () => {
 }
 
 let lastRefreshed = Date.now()/1E3
-
+let i = 0
 const update = () => {
   const epoch = Date.now()/1E3
   const keysDown = keyListener.getKeysDown()
@@ -199,8 +216,16 @@ const update = () => {
     lastRefreshed = epoch
     segmentDisplay.update(epoch)
   }
-  
-  renderer.render(scene,camera)
+  /*
+  scene.rotation.set(0,i,0)
+  i+=0.1
+  console.log(i)
+  if( i > 6.28 ){
+    i = 0
+  }
+  renderer.toneMappingExposure = Math.sin(3*i/6.28)
+  */
+  renderer.render(scene,mainCamera)
 }
 
 init()
