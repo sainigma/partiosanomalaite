@@ -27,8 +27,8 @@ export class Keyboard {
     loader.load('nappaimisto.gltf', (gltf) => {
       this.keyboard = gltf.scene
       this.keyboard.scale.set(10,10,10)
-      this.keyboard.position.set(0,0.42,0)
-      
+      this.keyboard.position.set(0,0.025641*10, -0.021675*10)
+
       this.keyboard.children.forEach( (item,index) => {
         const key = item.name
         this.keyEnum[key] = index

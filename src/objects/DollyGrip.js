@@ -3,7 +3,7 @@ import * as THREE from 'three'
 export class DollyGrip{
   constructor(camera){
     this.camera = camera
-    this.offsets = new THREE.Vector3( -2, 10, 10 )
+    this.offsets = new THREE.Vector3( -2, 5, 5 )
     this.cameraPivot = new THREE.Group()
     this.bindTarget = new THREE.Vector3( -1.2,0.8,-2.5 )
     this.cameraPivot.add( camera )

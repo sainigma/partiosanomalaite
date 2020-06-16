@@ -50,10 +50,10 @@ const init = () => {
   let container
   container = document.getElementById('root')
 
-  camera2 = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.05, 50)
+  camera2 = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.05, 100)
   camera2.position.set(-10,15,10)
   camera2.lookAt(0,0,0)
-  camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.05, 50)
+  camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.05, 100)
 
   mainCamera = camera
 
@@ -78,7 +78,7 @@ const init = () => {
   radio = new Radio(radioGroup)
   mapBook = new MapBook(notebookGroup)
   noteBook = new NoteBook(notebookGroup, mapBook, camera)
-  const segmentInitialPosition = new THREE.Vector3(-0.38,0.42,-0.3)
+  const segmentInitialPosition = new THREE.Vector3(-0.38,0.28,-0.51)
   segmentDisplay = new SegmentDisplay(16,parsaGroup,segmentInitialPosition)
   
   scene.add(parsaGroup)
@@ -96,7 +96,7 @@ const init = () => {
   notebookGroup.rotateX( 18.3023*3.14159/180 )
   notebookGroup.rotateZ( 1.38244*3.14159/180 )
 
-  parsaGroup.position.set(-0.100125*10, 0.002713*10,0.000321*10)
+  parsaGroup.position.set(-0.100125*10, 0.015575*10,0.023716*10)
   parsaGroup.rotateY( -0.129661*3.14159/180 )
   parsaGroup.rotateX( 6.7524*3.14159/180 )
   parsaGroup.rotateZ( 0.681243*3.14159/180 )
@@ -112,6 +112,8 @@ const init = () => {
   intersecter.addGroup(notebookGroup)
   intersecter.addGroup(dollyGrip.getCameraPivot())
 
+  dollyGrip.addTransition( new THREE.Vector3( 0, 0, 0 ), dollyGrip.offsets , 0.5 )
+  dollyGrip.update(1)
   mouseListener = new MouseListener(intersecter)
   keyboard = new Keyboard(parsaGroup,audioPlayer)
   
@@ -160,6 +162,7 @@ const init = () => {
   interfaces.push(noteBookInterface)
 
 }
+
 let loadingFinishedAt = 0
 const loadingScreen = () => {
   if( loadingFinishedAt > 0 ){
@@ -216,17 +219,29 @@ const update = () => {
     lastRefreshed = epoch
     segmentDisplay.update(epoch)
   }
-  /*
-  scene.rotation.set(0,i,0)
-  i+=0.1
-  console.log(i)
-  if( i > 6.28 ){
-    i = 0
-  }
-  renderer.toneMappingExposure = Math.sin(3*i/6.28)
-  */
   renderer.render(scene,mainCamera)
 }
+
+let cameraFov = -1
+const onWindowResize = () => {
+  mainCamera.aspect = window.innerWidth / window.innerHeight
+  mainCamera.updateProjectionMatrix()
+  renderer.setSize(window.innerWidth, window.innerHeight)
+}
+const onZoom = (event) => {
+  const zoomSpeed = 5
+  cameraFov = cameraFov == -1 ? camera.getFocalLength() : cameraFov
+  if(event.deltaY > 0){
+    cameraFov -= zoomSpeed
+  }else{
+    cameraFov += zoomSpeed
+  }
+  cameraFov = cameraFov >= 100 ? 100 : cameraFov <= 10 ? 10 : cameraFov
+  camera.setFocalLength( cameraFov )
+}
+
+document.addEventListener('wheel', onZoom)
+window.addEventListener('resize', onWindowResize, false)
 
 init()
 loadingScreen()
