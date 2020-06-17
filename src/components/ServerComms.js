@@ -9,7 +9,7 @@ export class ServerComms{
       callsign: '',
       group: '',
       subgroup: '',
-      checksum1: 'ZJRZ',
+      checksum1: '',
       checksum2: '',
     }
     this.success = 0
@@ -22,7 +22,7 @@ export class ServerComms{
     this.hasHandshakes = false
     this.hasMessages = false
     this.keys = {
-      key1:'AAAAAAAABBBBBBBBCCCCCCCCDDDDDDDD',
+      key1:'',
       key2:''
     }
     this.connect()
