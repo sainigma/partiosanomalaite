@@ -1,7 +1,7 @@
 import { encryptMessage, decryptMessage } from './../utils/aesWrapper'
 
 export class ServerComms{
-  constructor(audioPlayer){
+  constructor(audioPlayer, wsock){
     this.messages = []
 
     this.settings = {
@@ -16,22 +16,37 @@ export class ServerComms{
     this.power = false
 
     this.audioPlayer = audioPlayer
-    this.socket = new WebSocket('ws://localhost:8080')
-    this.socket.onmessage = (event) => {this.incomingMessage(event)}
-    this.socket.onopen = (transmission) => {
-      try{
-        this.socket.send(transmission)
-      }catch(e){}
-      
-    }
+
+    this.wsock = wsock
+
     this.hasHandshakes = false
     this.hasMessages = false
     this.keys = {
       key1:'AAAAAAAABBBBBBBBCCCCCCCCDDDDDDDD',
       key2:''
     }
+    this.connect()
+  }
 
-    
+  connect(){
+
+    this.socket = new WebSocket(this.wsock)
+
+    this.socket.onmessage = (event) => {this.incomingMessage(event)}
+
+    this.socket.onopen = (transmission) => {
+      console.log('connected')
+      try{
+        this.socket.send(transmission)
+      }catch(e){}
+    }
+
+    this.socket.onclose = () => {
+      setTimeout( ()=>{
+        console.log('reconnecting..')
+        this.connect()
+      },5000  )
+    }
   }
 
   sendMessage(destination, message, checksums, keys){

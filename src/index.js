@@ -22,7 +22,7 @@ import { AudioPlayer } from './components/AudioPlayer'
 import { Intersecter } from './components/Intersecter'
 import './styles.css'
 
-
+let config
 let camera,camera2,mainCamera,scene,renderer
 let parsaGroup,radioGroup,notebookGroup,dollyGrip
 let segmentDisplay,parsa,enviroSphere,keyboard,radio,noteBook,mapBook,ground
@@ -46,10 +46,16 @@ const setActiveInterface = (name, forced) => {
   }
 }
 
+const loadConfig = async () => {
+  let result = await fetch('./misc/config')
+  config = await result.json()
+  init()
+}
+
 const init = () => {
   let container
   container = document.getElementById('root')
-
+  
   camera2 = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.05, 100)
   camera2.position.set(-10,15,10)
   camera2.lookAt(0,0,0)
@@ -104,7 +110,7 @@ const init = () => {
   scene.rotation.set(0,6.28*1.6,0)
   audioPlayer = new AudioPlayer()
   keyListener = new KeyListener(audioPlayer)
-  serverComms = new ServerComms(audioPlayer)
+  serverComms = new ServerComms(audioPlayer, config.wsock)
 
   intersecter = new Intersecter(window, mainCamera)
   intersecter.addGroup(parsaGroup)
@@ -161,6 +167,7 @@ const init = () => {
   interfaces.push(mapBookInterface)
   interfaces.push(noteBookInterface)
 
+  loadingScreen()
 }
 
 let loadingFinishedAt = 0
@@ -243,5 +250,4 @@ const onZoom = (event) => {
 document.addEventListener('wheel', onZoom)
 window.addEventListener('resize', onWindowResize, false)
 
-init()
-loadingScreen()
+loadConfig()

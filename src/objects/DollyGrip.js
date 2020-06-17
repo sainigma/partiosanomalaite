@@ -54,7 +54,6 @@ export class DollyGrip{
     if( this.animations.length > 0 ){
       const lastIndex = this.animations.length -1
       if( this.animations[lastIndex].startTime === -1 ){
-        console.log('init')
         const startPosition = this.cameraPivot.position
         const startTarget = this.camera.currentTarget
         this.animations[lastIndex].startPosition = new THREE.Vector3( startPosition.x, startPosition.y, startPosition.z )

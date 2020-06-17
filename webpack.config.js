@@ -74,6 +74,7 @@ let config = {
       filename: './index.html'
     }),
     new CopyWebPackPlugin([
+      {from:'./public/misc',to:'misc'},
       {from:'./public/textures',to:'textures'},
       {from:'./public/models',to:'models'},
       {from:'./public/sounds',to:'sounds'},
