@@ -1,3 +1,4 @@
 {
-  "wsock":"ws://134.122.65.19:8080"
+  "wsock":"wss://1030321.xyz:8080",
+  "noteBookPages":8
 }

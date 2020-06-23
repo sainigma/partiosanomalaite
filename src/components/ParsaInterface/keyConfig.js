@@ -3,12 +3,12 @@ export const KeyConfig = (mix) => class extends mix{
   constructor(){
     super()
     this.keys = {
-      key1:'AAAAAAAABBBBBBBBCCCCCCCCDDDDDDDD',
+      key1:'',
       key2:'',
       firstActive:true
     }
     this.checksums = {
-      key1:'ZJRZ',
+      key1:'',
       key2:''
     }
   }

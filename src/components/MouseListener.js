@@ -15,13 +15,16 @@ export class MouseListener {
       }
     }
     const mouseButtonToggle = (event) => {
+      this.mouse = event.buttons
       if( this.mouse === 0 ){
+        document.getElementById('root').style.cursor = 'auto'
         this.initialMouseX = event.clientX
         this.initialMouseY = event.clientY
       }else if( this.mouse === 1 ){
         this.intersecter.intersect( event.clientX, event.clientY, true )
+      }else if( this.mouse > 1 ){
+        document.getElementById('root').style.cursor = 'grabbing'
       }
-      this.mouse = event.buttons
     }
 
     this.initialMouseX = 1920/2

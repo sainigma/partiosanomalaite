@@ -93,14 +93,12 @@ export class RadioInterface extends GenericInterface{
 
   activate(){
     this.initDials()
-    console.log('radio activated')
     this.active = true
     this.setActiveInterface(this.name)
     this.dollyGrip.addTransition( this.getCameraPosition(), this.getLookAtTarget(), this.dollyTransitionTime )
   }
 
   deactivate(){
-    console.log('radio deactivated')
     this.active = false
   }
 
@@ -372,7 +370,9 @@ export class RadioInterface extends GenericInterface{
       }
     }else{
       this.intersecter.activate()
-      document.getElementById('root').style.cursor = 'auto'
+      if( document.getElementById('root').style.cursor !== 'grabbing' ){
+        document.getElementById('root').style.cursor = 'auto'
+      }
     }
 
     if( keyCodes.length > 0 ){

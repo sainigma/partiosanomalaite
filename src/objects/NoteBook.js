@@ -4,8 +4,11 @@ import { loadTexture } from './../utils/gltfUtils'
 
 export class NoteBook {
 
-  constructor(owner, mapBook){
+  constructor(owner, mapBook, pagesLength){
     this.owner = owner
+
+    this.pageSound = new Audio('sounds/page.wav')
+    this.pageNegSound = new Audio('sounds/pageNeg.wav')
 
     this.loadStarted = false
     this.loadingComplete = false
@@ -33,7 +36,7 @@ export class NoteBook {
     this.mapBook = mapBook
 
     this.selectedPage = 0
-    this.pagesLength = 30
+    this.pagesLength = pagesLength
     this.animation = {
       isAnimating: false,
       startTime: -1,
@@ -160,16 +163,23 @@ export class NoteBook {
 
   changePage(direction){
     if( this.vihko !== undefined ){
+      
       if( this.animation.isAnimating === false ){
         this.animation.direction = direction
  
         if( direction ){
-          this.animation.isAnimating = true
-          this.pageSurface.map = this.pages[this.selectedPage]
-          this.selectedPage++
-          this.noteBookSurface.map = this.pages[this.selectedPage]
+          if( this.selectedPage+1 < this.pagesLength ){
+            const pageChangeSound = this.pageSound.cloneNode()
+            pageChangeSound.play()
+            this.animation.isAnimating = true
+            this.pageSurface.map = this.pages[this.selectedPage]
+            this.selectedPage++
+            this.noteBookSurface.map = this.pages[this.selectedPage]
+          }
         }else{
           if( this.selectedPage-1 >= 0 ){
+            const pageChangeSound = this.pageNegSound.cloneNode()
+            pageChangeSound.play()
             this.animation.isAnimating = true
             this.noteBookSurface.map = this.pages[this.selectedPage]
             this.selectedPage--
@@ -178,8 +188,6 @@ export class NoteBook {
 
         }
         return true
-      }else{
-        console.log('hmm')
       }
     }
     return false

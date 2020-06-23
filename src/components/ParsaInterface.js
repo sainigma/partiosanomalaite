@@ -119,7 +119,6 @@ export class ParsaInterface extends ClassAggregator{
     if( this.bouncer.waitStart === 0 ){
       this.bouncer.waitStart = epoch
       this.display.setMessage( '................' )
-      console.log("intro alkoi")
       this.serverComms.send('handshake','yk')
     }else{
       const messages = [
@@ -360,6 +359,7 @@ export class ParsaInterface extends ClassAggregator{
 
   deactivate(){
     if( this.active ){
+      this.shiftToggled = false
       this.active = false
       this.resetAnimation()
       this.animation.direction = false
@@ -386,7 +386,9 @@ export class ParsaInterface extends ClassAggregator{
     if( !Number.isNaN(parseInt(keyCode)) || cases.includes(keyCode) ){
       document.getElementById('root').style.cursor = 'pointer'
     }else{
-      document.getElementById('root').style.cursor = 'auto'
+      if( document.getElementById('root').style.cursor !== 'grabbing' ){
+        document.getElementById('root').style.cursor = 'auto'
+      }
     }
     if( this.mouseListener.mouse === 1 && firstHover ){
       switch( keyCode ){
@@ -442,6 +444,7 @@ export class ParsaInterface extends ClassAggregator{
     if( this.active ){
       this.updateWhenActive( this.keyCodesWithMouseActions(keyCodes) ,epoch)
     }else{
+      this.updateWhenActive( [], epoch )
       const firstHover = this.intersecter.getFirstHover()
       if( firstHover ){
         switch( firstHover.object.parent.name ){

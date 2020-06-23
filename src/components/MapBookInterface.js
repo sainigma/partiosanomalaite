@@ -36,11 +36,8 @@ export class MapBookInterface extends GenericInterface{
     if( this.noteBookInterface.isActive() ){
       this.active = false
       this.setActiveInterface(undefined, 'notebook')
-      console.log('salamode')
 
     }else{
-      console.log('mapbook activated')
-      console.log(this.mapBook)
       this.setActiveInterface(this.name)
       this.dollyGrip.addTransition( this.getCameraPosition(), this.getLookAtTarget(), this.dollyTransitionTime )
     
@@ -48,7 +45,6 @@ export class MapBookInterface extends GenericInterface{
   }
 
   deactivate(){
-    console.log('mapbook deactivated')
     this.active = false
   }
 

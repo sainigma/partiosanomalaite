@@ -4,7 +4,6 @@ export class AudioPlayer{
     this.sounds = {
       'key':new Audio('sounds/key.wav'),
       'burst':new Audio('sounds/burst.mp3'),
-      'yk':new Audio('sounds/noise.mp3'),
       'keyDown':new Audio('sounds/keyDown.wav'),
       'keyUp':new Audio('sounds/keyUp.wav'),
       'static':new Audio('sounds/static.mp3')

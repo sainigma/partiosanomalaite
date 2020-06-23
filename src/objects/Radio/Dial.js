@@ -8,6 +8,7 @@ export class Dial{
     this.decrementSteps = decrementSteps
     this.stepAngleRads = 2*3.14159*(stepAngle/360)
     this.state = 0
+    this.dialClickSound = new Audio('sounds/dialClick.wav')
     if( object3d.children.length > 0 ){
       this.dialTarget = object3d.children[0]
       this.dialTarget.visible = false
@@ -40,20 +41,27 @@ export class Dial{
   resetTarget(){
     this.moveTarget({x:0,y:0})
   }
+  dialClick(){
+    const dialClick = this.dialClickSound.cloneNode()
+    dialClick.play()
+  }
   increment(){
     if( this.state + 1 <= this.incrementSteps ){
+      this.dialClick()
       this.state++
       this.object.rotateZ(this.stepAngleRads)
     }
   }
   decrement(){
     if( this.state - 1 >= -this.decrementSteps ){
+      this.dialClick()
       this.state--
       this.object.rotateZ(-this.stepAngleRads)
     }
   }
   set(value){
     if( value !== this.state ){
+      this.dialClick()
       this.reset()
       this.object.rotateZ(this.stepAngleRads*value)
       this.state = value

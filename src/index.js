@@ -83,7 +83,8 @@ const init = () => {
   parsa = new Parsa(parsaGroup)
   radio = new Radio(radioGroup)
   mapBook = new MapBook(notebookGroup)
-  noteBook = new NoteBook(notebookGroup, mapBook, camera)
+  //noteBook = new NoteBook(notebookGroup, mapBook, camera)
+  noteBook = new NoteBook(notebookGroup, mapBook, config.noteBookPages)
   const segmentInitialPosition = new THREE.Vector3(-0.38,0.28,-0.51)
   segmentDisplay = new SegmentDisplay(16,parsaGroup,segmentInitialPosition)
   
@@ -207,13 +208,21 @@ const animate = () => {
 }
 
 let lastRefreshed = Date.now()/1E3
-let i = 0
+let initialX = 0
 const update = () => {
   const epoch = Date.now()/1E3
   const keysDown = keyListener.getKeysDown()
   const mouse = mouseListener.getDeltas()
-  if( mouseListener.mouse >= 4 ){
-    dollyGrip.rotateAroundY( mouse.x/1e4 )
+  const absoluteMouse = mouseListener.getAbsolute()
+  if( mouseListener.mouse >= 2 ){
+    if( initialX !== 0 ){
+      const speed = 0.001
+      const rotateValue = speed*(absoluteMouse.x-initialX)
+      dollyGrip.rotateAroundY( rotateValue )
+    }
+    initialX = absoluteMouse.x
+  }else if( initialX !== 0 ){
+    initialX = 0
   }
 
   dollyGrip.update(epoch)
@@ -236,6 +245,7 @@ const onWindowResize = () => {
   renderer.setSize(window.innerWidth, window.innerHeight)
 }
 const onZoom = (event) => {
+  event.preventDefault()
   const zoomSpeed = 5
   cameraFov = cameraFov == -1 ? camera.getFocalLength() : cameraFov
   if(event.deltaY > 0){
