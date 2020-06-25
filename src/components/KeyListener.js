@@ -1,7 +1,7 @@
 export class KeyListener {
   constructor(audioPlayer){
     const keyDown = (event) => {
-      //event.preventDefault()
+      event.preventDefault()
       const keyCode = event.which
       if( this.keysDown.indexOf( keyCode ) === -1 && this.keysDown.length < 6){
         this.keysDown.push(keyCode)

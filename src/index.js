@@ -83,7 +83,6 @@ const init = () => {
   parsa = new Parsa(parsaGroup)
   radio = new Radio(radioGroup)
   mapBook = new MapBook(notebookGroup)
-  //noteBook = new NoteBook(notebookGroup, mapBook, camera)
   noteBook = new NoteBook(notebookGroup, mapBook, config.noteBookPages)
   const segmentInitialPosition = new THREE.Vector3(-0.38,0.28,-0.51)
   segmentDisplay = new SegmentDisplay(16,parsaGroup,segmentInitialPosition)
@@ -216,7 +215,7 @@ const update = () => {
   const absoluteMouse = mouseListener.getAbsolute()
   if( mouseListener.mouse >= 2 ){
     if( initialX !== 0 ){
-      const speed = 0.001
+      const speed = -0.001
       const rotateValue = speed*(absoluteMouse.x-initialX)
       dollyGrip.rotateAroundY( rotateValue )
     }

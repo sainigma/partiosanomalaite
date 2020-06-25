@@ -55,7 +55,7 @@ export class ParsaInterface extends ClassAggregator{
     }
 
 
-    this.messages = [
+    this.messages = [/*
       {
         time:1586100737382,
         content:'Eka viesti',
@@ -66,7 +66,7 @@ export class ParsaInterface extends ClassAggregator{
         content:'Toka viesti',
         sender:'BBB'
       },
-    ]
+    */]
     this.newMessages = false
     this.parsaIndexInParsaGroup = -1
     this.animation = {

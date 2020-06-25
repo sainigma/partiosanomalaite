@@ -59,6 +59,7 @@ export class SegmentDisplay {
     this.stop=false
     this.scrolling=true
     this.timestamp = timestamp
+    this.scrollingOvertime = 0
   }
   getMessage(){
     return this.message
@@ -66,10 +67,17 @@ export class SegmentDisplay {
   update(epoch){
     let scrollingOffset = 0
     if( this.scrolling ){
-      scrollingOffset = parseInt( (epoch - this.timestamp)*10 ) -8
-      if( scrollingOffset < 0 ) scrollingOffset = 0
+      let tempScrollingOffset = parseInt( (epoch - this.timestamp)*10 ) -8
+      if( tempScrollingOffset < 0 ) tempScrollingOffset = 0
       const maxScroll = this.message.length - 16
-      if( scrollingOffset > maxScroll ) scrollingOffset = maxScroll
+      if( tempScrollingOffset > maxScroll ) {
+        scrollingOffset = maxScroll
+        if( tempScrollingOffset - maxScroll > 16 ){
+          this.setScrollingMessage(this.message, epoch)
+        }
+      }else{
+        scrollingOffset = tempScrollingOffset
+      }
     }
     if( !this.stop && this.segmentGroup.children.length === this.segments){
       let internalMessage = this.message.slice(scrollingOffset,this.message.length)

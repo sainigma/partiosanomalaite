@@ -191,7 +191,13 @@ export const Messenger = (mix) => class extends mix{
   readMessage(keyCodes, resetIndex){
     if( !this.state.hasUpdated ){
       this.state.hasUpdated = true
-      this.display.setMessage( this.messages[this.inboxselection].content )
+      const content = this.messages[this.inboxselection].content
+      if( content.length <= 16 ){
+        this.display.setMessage( content )
+      }else{
+        this.display.setScrollingMessage( content, Date.now()/1E3 )
+      }
+      
       if( this.inboxselection === this.messages.length -1 ){
         this.newMessages = false
       }
