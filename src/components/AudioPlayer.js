@@ -6,7 +6,8 @@ export class AudioPlayer{
       'burst':new Audio('sounds/burst.mp3'),
       'keyDown':new Audio('sounds/keyDown.wav'),
       'keyUp':new Audio('sounds/keyUp.wav'),
-      'static':new Audio('sounds/static.mp3')
+      'static':new Audio('sounds/static.mp3'),
+      'yk':new Audio('sounds/yk.wav')
     }
   }
   play(handle){
